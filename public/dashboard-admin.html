@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        muhammadiyah: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16'
+                        },
+                        emas: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .table-row:hover { background-color: rgba(0,0,0,0.02); }
+        .dark .table-row:hover { background-color: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Header -->
+    <header class="bg-muhammadiyah-900 dark:bg-gray-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-emas-400 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-muhammadiyah-900" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm">SMKS Muhammadiyah Pakem</h1>
+                    <p class="text-xs text-muhammadiyah-300">Dashboard Admin</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                <div class="hidden md:block text-right">
+                    <p id="user-name" class="text-sm font-semibold">Admin</p>
+                    <p class="text-xs text-muhammadiyah-300">Administrator</p>
+                </div>
+                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span class="text-sm">Keluar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-4 lg:p-8">
+        <!-- Statistik Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Total Siswa</p>
+                <p id="stat-siswa" class="text-3xl font-bold text-gray-800 dark:text-white mt-2">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Total Guru</p>
+                <p id="stat-guru" class="text-3xl font-bold text-muhammadiyah-600 dark:text-muhammadiyah-400 mt-2">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Mata Pelajaran</p>
+                <p id="stat-mapel" class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Sesi Aktif</p>
+                <p id="stat-sesi-aktif" class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">0</p>
+            </div>
+        </div>
+
+        <!-- Rekap Per Mapel -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Rekap Kehadiran per Mata Pelajaran</h2>
+                <div class="flex gap-3">
+                    <select id="filter-bulan" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                        <option value="">Semua Bulan</option>
+                        <option value="1">Januari</option>
+                        <option value="2">Februari</option>
+                        <option value="3">Maret</option>
+                        <option value="4">April</option>
+                        <option value="5">Mei</option>
+                        <option value="6">Juni</option>
+                        <option value="7">Juli</option>
+                        <option value="8">Agustus</option>
+                        <option value="9">September</option>
+                        <option value="10">Oktober</option>
+                        <option value="11">November</option>
+                        <option value="12">Desember</option>
+                    </select>
+                    <select id="filter-tahun" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                        <option value="">Semua Tahun</option>
+                    </select>
+                    <button onclick="loadRekapMapel()" class="px-4 py-2 bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white rounded-lg text-sm font-semibold transition">
+                        Filter
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mata Pelajaran</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Guru</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jumlah Sesi</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Total Kehadiran</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Siswa Unik</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-mapel-body">
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detail Rekap Presensi -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Detail Rekap Presensi</h2>
+                <div class="flex flex-wrap gap-3">
+                    <input type="date" id="filter-tanggal" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                    <select id="filter-mapel" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                        <option value="">Semua Mapel</option>
+                    </select>
+                    <select id="filter-kelas" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
+                        <option value="">Semua Kelas</option>
+                    </select>
+                    <button onclick="loadRekapDetail()" class="px-4 py-2 bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white rounded-lg text-sm font-semibold transition">
+                        Filter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistik Detail -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Catatan</p>
+                    <p id="rekap-stat-total" class="text-2xl font-bold text-gray-800 dark:text-white">0</p>
+                </div>
+                <div class="bg-green-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                    <p class="text-sm text-green-600 dark:text-green-400">Siswa Hadir (Unik)</p>
+                    <p id="rekap-stat-siswa" class="text-2xl font-bold text-green-700 dark:text-white">0</p>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">NIS</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Nama Siswa</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Tanggal</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jam</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-detail-body">
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-gray-500 dark:text-gray-400">Pilih filter untuk melihat detail</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Sesi Aktif (Monitoring Real-time) -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                Sesi Presensi Aktif
+                <span class="ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full text-xs font-semibold animate-pulse">● LIVE</span>
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700">
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Guru</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
+                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Hadir</th>
+                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Dibuka</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sesi-aktif-body">
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard-admin.js"></script>
+</body>
+</html>

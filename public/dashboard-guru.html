@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Guru - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        muhammadiyah: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            950: '#052e16'
+                        },
+                        emas: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .table-row:hover { background-color: rgba(0,0,0,0.02); }
+        .dark .table-row:hover { background-color: rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Header -->
+    <header class="bg-muhammadiyah-900 dark:bg-gray-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-emas-400 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-muhammadiyah-900" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-sm">SMKS Muhammadiyah Pakem</h1>
+                    <p class="text-xs text-muhammadiyah-300">Dashboard Guru</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+                <div class="hidden md:block text-right">
+                    <p id="user-name" class="text-sm font-semibold">Guru</p>
+                    <p class="text-xs text-muhammadiyah-300">Guru Pengampu</p>
+                </div>
+                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span class="text-sm">Keluar</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto p-4 lg:p-8">
+        <!-- Grid Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- ===== KIRI: BUKA SESI + QR ===== -->
+            <div class="space-y-8">
+                <!-- Form Buka Sesi -->
+                <div id="form-sesi-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-muhammadiyah-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                        </svg>
+                        Buka Sesi Absensi
+                    </h2>
+                    
+                    <form id="form-buka-sesi" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mata Pelajaran</label>
+                            <select id="select-mapel" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                                <option value="">Pilih Mata Pelajaran</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kelas</label>
+                            <select id="select-kelas" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
+                                <option value="">Pilih Kelas</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]">
+                            Buka Sesi Presensi
+                        </button>
+                    </form>
+                </div>
+
+                <!-- QR Code Sesi Aktif -->
+                <div id="qr-sesi-card" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">QR Code Sesi Aktif</h2>
+                        <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full text-xs font-semibold animate-pulse">
+                            ● LIVE
+                        </span>
+                    </div>
+                    
+                    <div id="sesi-info" class="bg-muhammadiyah-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-semibold text-muhammadiyah-800 dark:text-white" id="sesi-mapel">-</p>
+                            <p class="text-xs text-muhammadiyah-600 dark:text-muhammadiyah-300" id="sesi-kode">-</p>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Kelas: <span id="sesi-kelas">-</span></p>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Dibuka: <span id="sesi-waktu">-</span></p>
+                    </div>
+
+                    <div class="flex justify-center mb-4">
+                        <div id="qr-container" class="bg-white p-4 rounded-xl border-2 border-dashed border-muhammadiyah-300 dark:border-muhammadiyah-700">
+                            <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
+                        </div>
+                    </div>
+
+                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                        Arahkan kamera siswa ke QR Code ini untuk presensi
+                    </p>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Siswa Hadir</p>
+                            <p id="jumlah-hadir" class="text-2xl font-bold text-muhammadiyah-600 dark:text-muhammadiyah-400">0</p>
+                        </div>
+                        <button onclick="tutupSesi()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                            Tutup Sesi
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== KANAN: DAFTAR HADIR REAL-TIME ===== -->
+            <div class="space-y-8">
+                <!-- Daftar Siswa Hadir -->
+                <div id="daftar-hadir-card" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Daftar Siswa Hadir <span class="text-sm font-normal text-gray-500">(Real-time)</span></h2>
+                    <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                        <table class="w-full text-sm">
+                            <thead class="sticky top-0 bg-white dark:bg-gray-800">
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">NIS</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Nama</th>
+                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jam</th>
+                                </tr>
+                            </thead>
+                            <tbody id="daftar-hadir-body">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">
+                                        Belum ada siswa yang hadir
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Riwayat Sesi -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
+                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Riwayat Sesi Presensi</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
+                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
+                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Status</th>
+                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Hadir</th>
+                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="riwayat-sesi-body">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/dashboard-guru.js"></script>
+</body>
+</html>

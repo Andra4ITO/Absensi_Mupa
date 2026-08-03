@@ -1,0 +1,444 @@
+{
+  "users": [
+    {
+      "id": "USR-001",
+      "username": "admin",
+      "password": "$2a$10$FIkdNX7ozIZ4gH8FUEqLUO44ub85aG49HF2sbU1yiuAT/Vux/svv2",
+      "role": "admin",
+      "nama": "Administrator",
+      "refId": null
+    },
+    {
+      "id": "USR-002",
+      "username": "budi",
+      "password": "$2a$10$m6j5ZIqD1EPL.GDe24CF8uTD4yg9o97kdrOTAy24nV7D1/3e/3r/m",
+      "role": "guru",
+      "nama": "Budi Santoso, S.Kom",
+      "refId": "GRU-001"
+    },
+    {
+      "id": "USR-003",
+      "username": "siti",
+      "password": "$2a$10$inhTzm07Wc6zj8IxsAll9eDC1S7WWocc14dLIysGrB8e1h2eH3.j6",
+      "role": "guru",
+      "nama": "Siti Rahayu, S.Pd",
+      "refId": "GRU-002"
+    },
+    {
+      "id": "USR-004",
+      "username": "ahmad",
+      "password": "$2a$10$zocoHmhv1.7QJ3UOKs8ufOVWihOoKBfulX/2BjZu5Q9boBGFuaJRS",
+      "role": "guru",
+      "nama": "Ahmad Fauzi, M.Kom",
+      "refId": "GRU-003"
+    },
+    {
+      "id": "USR-005",
+      "username": "andi",
+      "password": "$2a$10$0AdSyDIjARShYfZJNTf3wezrLyckXWUFaxwtGjFohMnualjVictwu",
+      "role": "siswa",
+      "nama": "Andi Pratama",
+      "refId": "SIS-001"
+    },
+    {
+      "id": "USR-006",
+      "username": "bella",
+      "password": "$2a$10$ddrWmMvmikYmtrhpJ0nLiOAFA/hvMMz.crM9EMOlQ4xsb6UnKmaiG",
+      "role": "siswa",
+      "nama": "Bella Safitri",
+      "refId": "SIS-002"
+    },
+    {
+      "id": "USR-007",
+      "username": "citra",
+      "password": "$2a$10$nKV8gbStj8XZm3.Th20NI.d2BoxwAQaC1YYroC6DVJU14QnVU8xJa",
+      "role": "siswa",
+      "nama": "Citra Dewi",
+      "refId": "SIS-003"
+    },
+    {
+      "id": "USR-008",
+      "username": "dedi",
+      "password": "$2a$10$IZpuYeKXP1d8G2Vcwv235uH6yQlOJRJ5Zhe0h0DwIMwaMyTOcbple",
+      "role": "siswa",
+      "nama": "Dedi Kurniawan",
+      "refId": "SIS-004"
+    },
+    {
+      "id": "USR-009",
+      "username": "eka",
+      "password": "$2a$10$C4f0txlQtZY069RlCUZLD.rv0nqBqjfUyltEmdH9V0Q/vcxlILuDi",
+      "role": "siswa",
+      "nama": "Eka Putri",
+      "refId": "SIS-005"
+    },
+    {
+      "id": "USR-010",
+      "username": "fajar",
+      "password": "$2a$10$Spoy.mZlxwfwaOhbeogj/eJfx9I9BVIKBROaT7R9inemrIv9Khhdm",
+      "role": "siswa",
+      "nama": "Fajar Nugroho",
+      "refId": "SIS-006"
+    },
+    {
+      "id": "USR-011",
+      "username": "galih",
+      "password": "$2a$10$nBC/VRmLrthnX5ILsQOqM.9P2vD3trlbdKEvk0uZDAoirfWdWHTXK",
+      "role": "siswa",
+      "nama": "Galih Pratomo",
+      "refId": "SIS-007"
+    },
+    {
+      "id": "USR-012",
+      "username": "hana",
+      "password": "$2a$10$Wlj2P70oluAZgUiV6jenAORmXN60sjR/U9A4nn6gzNoyFIbBjmOG.",
+      "role": "siswa",
+      "nama": "Hana Maulida",
+      "refId": "SIS-008"
+    },
+    {
+      "id": "USR-013",
+      "username": "iqbal",
+      "password": "$2a$10$NMXMgBuu58QjqNCvmzawMe0X/PeYpZhc5AKCrknaymSU9HK7dPxLW",
+      "role": "siswa",
+      "nama": "Iqbal Ramadhan",
+      "refId": "SIS-009"
+    },
+    {
+      "id": "USR-014",
+      "username": "jihan",
+      "password": "$2a$10$GKWb0rPD8GLeFdkdB1/zn.HWPPwPqp5nvAyOxQfIEoxSCUXADahzC",
+      "role": "siswa",
+      "nama": "Jihan Anindya",
+      "refId": "SIS-010"
+    },
+    {
+      "id": "USR-015",
+      "username": "krisna",
+      "password": "$2a$10$wOj7YjUsiVl/D8CTGgNLW.07wQ9b7l8M10LUoVkX0.v.S2E50gUd2",
+      "role": "siswa",
+      "nama": "Krisna Wijaya",
+      "refId": "SIS-011"
+    },
+    {
+      "id": "USR-016",
+      "username": "laila",
+      "password": "$2a$10$Y39DrYhJxQMmliGMO44xruTIyamcAMru6Rw66g06nTGGWcpyxcLVO",
+      "role": "siswa",
+      "nama": "Laila Fitriani",
+      "refId": "SIS-012"
+    }
+  ],
+  "siswa": [
+    {
+      "id": "SIS-001",
+      "nis": "2024001",
+      "nama": "Andi Pratama",
+      "kelasId": "KLS-001",
+      "email": "andi@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-002",
+      "nis": "2024002",
+      "nama": "Bella Safitri",
+      "kelasId": "KLS-001",
+      "email": "bella@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-003",
+      "nis": "2024003",
+      "nama": "Citra Dewi",
+      "kelasId": "KLS-002",
+      "email": "citra@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-004",
+      "nis": "2024004",
+      "nama": "Dedi Kurniawan",
+      "kelasId": "KLS-002",
+      "email": "dedi@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-005",
+      "nis": "2024005",
+      "nama": "Eka Putri",
+      "kelasId": "KLS-003",
+      "email": "eka@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-006",
+      "nis": "2024006",
+      "nama": "Fajar Nugroho",
+      "kelasId": "KLS-003",
+      "email": "fajar@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-007",
+      "nis": "2024007",
+      "nama": "Galih Pratomo",
+      "kelasId": "KLS-004",
+      "email": "galih@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-008",
+      "nis": "2024008",
+      "nama": "Hana Maulida",
+      "kelasId": "KLS-004",
+      "email": "hana@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-009",
+      "nis": "2024009",
+      "nama": "Iqbal Ramadhan",
+      "kelasId": "KLS-005",
+      "email": "iqbal@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-010",
+      "nis": "2024010",
+      "nama": "Jihan Anindya",
+      "kelasId": "KLS-005",
+      "email": "jihan@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-011",
+      "nis": "2024011",
+      "nama": "Krisna Wijaya",
+      "kelasId": "KLS-006",
+      "email": "krisna@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "SIS-012",
+      "nis": "2024012",
+      "nama": "Laila Fitriani",
+      "kelasId": "KLS-006",
+      "email": "laila@student.smkmuhpakem.sch.id",
+      "jurusan": "RPL"
+    }
+  ],
+  "guru": [
+    {
+      "id": "GRU-001",
+      "nip": "197501012005011001",
+      "nama": "Budi Santoso, S.Kom",
+      "email": "budi@smkmuhpakem.sch.id",
+      "mapelIds": [
+        "MPL-001",
+        "MPL-002"
+      ],
+      "kelasIds": [
+        "KLS-001",
+        "KLS-002",
+        "KLS-003"
+      ]
+    },
+    {
+      "id": "GRU-002",
+      "nip": "198002152008012002",
+      "nama": "Siti Rahayu, S.Pd",
+      "email": "siti@smkmuhpakem.sch.id",
+      "mapelIds": [
+        "MPL-004"
+      ],
+      "kelasIds": [
+        "KLS-003",
+        "KLS-004",
+        "KLS-005",
+        "KLS-006"
+      ]
+    },
+    {
+      "id": "GRU-003",
+      "nip": "198503102010011003",
+      "nama": "Ahmad Fauzi, M.Kom",
+      "email": "ahmad@smkmuhpakem.sch.id",
+      "mapelIds": [
+        "MPL-003"
+      ],
+      "kelasIds": [
+        "KLS-001",
+        "KLS-002",
+        "KLS-005",
+        "KLS-006"
+      ]
+    }
+  ],
+  "kelas": [
+    {
+      "id": "KLS-001",
+      "nama": "X RPL 1",
+      "tingkat": "X",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "KLS-002",
+      "nama": "X RPL 2",
+      "tingkat": "X",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "KLS-003",
+      "nama": "XI RPL 1",
+      "tingkat": "XI",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "KLS-004",
+      "nama": "XI RPL 2",
+      "tingkat": "XI",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "KLS-005",
+      "nama": "XII RPL 1",
+      "tingkat": "XII",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "KLS-006",
+      "nama": "XII RPL 2",
+      "tingkat": "XII",
+      "jurusan": "RPL"
+    }
+  ],
+  "mapel": [
+    {
+      "id": "MPL-001",
+      "kode": "RPL-101",
+      "nama": "Pemrograman Web",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "MPL-002",
+      "kode": "RPL-102",
+      "nama": "Basis Data",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "MPL-003",
+      "kode": "RPL-103",
+      "nama": "Pemrograman Berorientasi Objek",
+      "jurusan": "RPL"
+    },
+    {
+      "id": "MPL-004",
+      "kode": "MTK-101",
+      "nama": "Matematika",
+      "jurusan": "Umum"
+    },
+    {
+      "id": "MPL-005",
+      "kode": "BIN-101",
+      "nama": "Bahasa Indonesia",
+      "jurusan": "Umum"
+    },
+    {
+      "id": "MPL-006",
+      "kode": "BIG-101",
+      "nama": "Bahasa Inggris",
+      "jurusan": "Umum"
+    }
+  ],
+  "guruMapel": [
+    {
+      "id": "00GMP-1",
+      "guruId": "GRU-001",
+      "mapelId": "MPL-001"
+    },
+    {
+      "id": "00GMP-2",
+      "guruId": "GRU-001",
+      "mapelId": "MPL-002"
+    },
+    {
+      "id": "00GMP-3",
+      "guruId": "GRU-002",
+      "mapelId": "MPL-004"
+    },
+    {
+      "id": "00GMP-4",
+      "guruId": "GRU-003",
+      "mapelId": "MPL-003"
+    }
+  ],
+  "sesiPresensi": [
+    {
+      "id": "SES-0001",
+      "token": "QR-1785741606144-LDVLXOD7",
+      "guruId": "GRU-001",
+      "guruNama": "Budi Santoso, S.Kom",
+      "mapelId": "MPL-001",
+      "mapelNama": "Pemrograman Web",
+      "mapelKode": "RPL-101",
+      "kelasId": "KLS-001",
+      "kelasNama": "X RPL 1",
+      "status": "ditutup",
+      "dibukaPada": "2026-08-03T07:20:06.158Z",
+      "ditutupPada": "2026-08-03T07:20:29.087Z",
+      "jumlahHadir": 0
+    },
+    {
+      "id": "SES-0002",
+      "token": "QR-1785741747676-A2W0AG42",
+      "guruId": "GRU-001",
+      "guruNama": "Budi Santoso, S.Kom",
+      "mapelId": "MPL-002",
+      "mapelNama": "Basis Data",
+      "mapelKode": "RPL-102",
+      "kelasId": "KLS-006",
+      "kelasNama": "XII RPL 2",
+      "status": "ditutup",
+      "dibukaPada": "2026-08-03T07:22:27.677Z",
+      "ditutupPada": "2026-08-03T07:25:59.702Z",
+      "jumlahHadir": 0
+    },
+    {
+      "id": "SES-0003",
+      "token": "QR-1785741965954-PCBXGQ8Z",
+      "guruId": "GRU-001",
+      "guruNama": "Budi Santoso, S.Kom",
+      "mapelId": "MPL-001",
+      "mapelNama": "Pemrograman Web",
+      "mapelKode": "RPL-101",
+      "kelasId": "KLS-001",
+      "kelasNama": "X RPL 1",
+      "status": "aktif",
+      "dibukaPada": "2026-08-03T07:26:05.954Z",
+      "ditutupPada": null,
+      "jumlahHadir": 1
+    }
+  ],
+  "logKehadiran": [
+    {
+      "id": "LOG-1785742042412",
+      "sesiId": "SES-0003",
+      "siswaId": "SIS-001",
+      "siswaNama": "Andi Pratama",
+      "siswaNis": "2024001",
+      "kelasId": "KLS-001",
+      "kelasNama": "X RPL 1",
+      "mapelId": "MPL-001",
+      "mapelNama": "Pemrograman Web",
+      "timestamp": "2026-08-03T07:27:22.411Z",
+      "tanggal": "2026-08-03",
+      "jam": "00:27:22"
+    }
+  ],
+  "settings": {
+    "namaSekolah": "SMKS Muhammadiyah Pakem",
+    "jamMasuk": "07:00",
+    "jamPulang": "15:00",
+    "batasTerlambat": "07:15"
+  }
+}

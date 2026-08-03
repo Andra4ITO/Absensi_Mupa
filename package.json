@@ -1,0 +1,33 @@
+{
+  "name": "sistem-presensi-smkmuhammadiyah-pakem",
+  "version": "2.0.0",
+  "description": "Sistem Presensi Digital SMKS Muhammadiyah Pakem - Node.js + Express + Socket.io + QR Code",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "presensi",
+    "absensi",
+    "sekolah",
+    "muhammadiyah",
+    "express",
+    "socket.io",
+    "qrcode",
+    "lowdb"
+  ],
+  "author": "SMKS Muhammadiyah Pakem",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "lowdb": "^1.0.0",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.5"
+  }
+}
