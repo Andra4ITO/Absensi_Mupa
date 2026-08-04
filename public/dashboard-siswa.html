@@ -230,5 +230,16 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/dashboard-siswa.js"></script>
+
+    <!-- Firebase Database Layer (modular ESM via import maps) -->
+    <script type="importmap">
+    {
+      "imports": {
+        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      }
+    }
+    </script>
+    <script type="module" src="/src/models/firebase-bootstrap.js"></script>
 </body>
 </html>
