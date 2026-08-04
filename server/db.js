@@ -32,6 +32,15 @@ db.defaults({
   }
 }).write();
 
+// Daftar jurusan resmi SMKS Muhammadiyah Pakem
+const JURUSAN_LIST = ['RPL', 'TKR', 'TSM', 'PBS', 'DPIB'];
+const TINGKAT_LIST = ['X', 'XI', 'XII'];
+
+// Helper untuk generate ID kelas
+function generateKelasId(tingkat, jurusan, rombel) {
+  return `KLS-${tingkat}-${jurusan}-${rombel}`;
+}
+
 // Seed data awal jika database kosong
 async function seedData() {
   const usersCount = db.get('users').size().value();
@@ -39,15 +48,24 @@ async function seedData() {
   if (usersCount === 0) {
     const hashPassword = (password) => bcrypt.hashSync(password, 10);
     
-    // Data Kelas
-    const kelasData = [
-      { id: 'KLS-001', nama: 'X RPL 1', tingkat: 'X', jurusan: 'RPL' },
-      { id: 'KLS-002', nama: 'X RPL 2', tingkat: 'X', jurusan: 'RPL' },
-      { id: 'KLS-003', nama: 'XI RPL 1', tingkat: 'XI', jurusan: 'RPL' },
-      { id: 'KLS-004', nama: 'XI RPL 2', tingkat: 'XI', jurusan: 'RPL' },
-      { id: 'KLS-005', nama: 'XII RPL 1', tingkat: 'XII', jurusan: 'RPL' },
-      { id: 'KLS-006', nama: 'XII RPL 2', tingkat: 'XII', jurusan: 'RPL' }
-    ];
+    // Data Kelas - Semua jurusan resmi (RPL, TKR, TSM, PBS, DPIB) x (X, XI, XII)
+    const kelasData = [];
+    let kelasCounter = 1;
+    JURUSAN_LIST.forEach(jurusan => {
+      TINGKAT_LIST.forEach(tingkat => {
+        // Setiap jurusan & tingkat punya 2 rombel (1 dan 2)
+        for (let rombel = 1; rombel <= 2; rombel++) {
+          kelasData.push({
+            id: `KLS-${String(kelasCounter).padStart(3, '0')}`,
+            nama: `${tingkat} ${jurusan} ${rombel}`,
+            tingkat,
+            jurusan,
+            rombel
+          });
+          kelasCounter++;
+        }
+      });
+    });
     db.get('kelas').push(...kelasData).write();
 
     // Data Mata Pelajaran
@@ -82,8 +100,9 @@ async function seedData() {
     });
     db.get('guruMapel').push(...guruMapelData).write();
 
-    // Data Siswa (contoh 12 siswa)
+    // Data Siswa - mencakup semua jurusan (RPL, TKR, TSM, PBS, DPIB)
     const siswaData = [
+      // RPL (KLS-001 s/d KLS-006)
       { id: 'SIS-001', nis: '2024001', nama: 'Andi Pratama', kelasId: 'KLS-001', email: 'andi@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
       { id: 'SIS-002', nis: '2024002', nama: 'Bella Safitri', kelasId: 'KLS-001', email: 'bella@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
       { id: 'SIS-003', nis: '2024003', nama: 'Citra Dewi', kelasId: 'KLS-002', email: 'citra@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
@@ -95,7 +114,35 @@ async function seedData() {
       { id: 'SIS-009', nis: '2024009', nama: 'Iqbal Ramadhan', kelasId: 'KLS-005', email: 'iqbal@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
       { id: 'SIS-010', nis: '2024010', nama: 'Jihan Anindya', kelasId: 'KLS-005', email: 'jihan@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
       { id: 'SIS-011', nis: '2024011', nama: 'Krisna Wijaya', kelasId: 'KLS-006', email: 'krisna@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
-      { id: 'SIS-012', nis: '2024012', nama: 'Laila Fitriani', kelasId: 'KLS-006', email: 'laila@student.smkmuhpakem.sch.id', jurusan: 'RPL' }
+      { id: 'SIS-012', nis: '2024012', nama: 'Laila Fitriani', kelasId: 'KLS-006', email: 'laila@student.smkmuhpakem.sch.id', jurusan: 'RPL' },
+      // TKR (KLS-007 s/d KLS-012)
+      { id: 'SIS-013', nis: '2024013', nama: 'Muhammad Rizki', kelasId: 'KLS-007', email: 'rizki@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      { id: 'SIS-014', nis: '2024014', nama: 'Nabila Putri', kelasId: 'KLS-007', email: 'nabila@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      { id: 'SIS-015', nis: '2024015', nama: 'Oki Setiawan', kelasId: 'KLS-008', email: 'oki@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      { id: 'SIS-016', nis: '2024016', nama: 'Putri Ayu', kelasId: 'KLS-008', email: 'putri@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      { id: 'SIS-017', nis: '2024017', nama: 'Rendra Pratama', kelasId: 'KLS-009', email: 'rendra@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      { id: 'SIS-018', nis: '2024018', nama: 'Salsabila', kelasId: 'KLS-009', email: 'salsabila@student.smkmuhpakem.sch.id', jurusan: 'TKR' },
+      // TSM (KLS-013 s/d KLS-018)
+      { id: 'SIS-019', nis: '2024019', nama: 'Taufik Hidayat', kelasId: 'KLS-013', email: 'taufik@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      { id: 'SIS-020', nis: '2024020', nama: 'Umar Faruq', kelasId: 'KLS-013', email: 'umar@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      { id: 'SIS-021', nis: '2024021', nama: 'Vina Rahma', kelasId: 'KLS-014', email: 'vina@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      { id: 'SIS-022', nis: '2024022', nama: 'Wahyu Nugroho', kelasId: 'KLS-014', email: 'wahyu@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      { id: 'SIS-023', nis: '2024023', nama: 'Yoga Pratama', kelasId: 'KLS-015', email: 'yoga@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      { id: 'SIS-024', nis: '2024024', nama: 'Zahra Aulia', kelasId: 'KLS-015', email: 'zahra@student.smkmuhpakem.sch.id', jurusan: 'TSM' },
+      // PBS (KLS-019 s/d KLS-024)
+      { id: 'SIS-025', nis: '2024025', nama: 'Aisyah Ramadhani', kelasId: 'KLS-019', email: 'aisyah@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      { id: 'SIS-026', nis: '2024026', nama: 'Bagas Prasetyo', kelasId: 'KLS-019', email: 'bagas@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      { id: 'SIS-027', nis: '2024027', nama: 'Cahya Ningrum', kelasId: 'KLS-020', email: 'cahya@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      { id: 'SIS-028', nis: '2024028', nama: 'Dimas Saputra', kelasId: 'KLS-020', email: 'dimas@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      { id: 'SIS-029', nis: '2024029', nama: 'Erika Puspita', kelasId: 'KLS-021', email: 'erika@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      { id: 'SIS-030', nis: '2024030', nama: 'Fikri Ramadhan', kelasId: 'KLS-021', email: 'fikri@student.smkmuhpakem.sch.id', jurusan: 'PBS' },
+      // DPIB (KLS-025 s/d KLS-030)
+      { id: 'SIS-031', nis: '2024031', nama: 'Gilang Ramadhan', kelasId: 'KLS-025', email: 'gilang@student.smkmuhpakem.sch.id', jurusan: 'DPIB' },
+      { id: 'SIS-032', nis: '2024032', nama: 'Hesti Pramesti', kelasId: 'KLS-025', email: 'hesti@student.smkmuhpakem.sch.id', jurusan: 'DPIB' },
+      { id: 'SIS-033', nis: '2024033', nama: 'Indra Lesmana', kelasId: 'KLS-026', email: 'indra@student.smkmuhpakem.sch.id', jurusan: 'DPIB' },
+      { id: 'SIS-034', nis: '2024034', nama: 'Joko Susilo', kelasId: 'KLS-026', email: 'joko@student.smkmuhpakem.sch.id', jurusan: 'DPIB' },
+      { id: 'SIS-035', nis: '2024035', nama: 'Kartika Sari', kelasId: 'KLS-027', email: 'kartika@student.smkmuhpakem.sch.id', jurusan: 'DPIB' },
+      { id: 'SIS-036', nis: '2024036', nama: 'Lukman Hakim', kelasId: 'KLS-027', email: 'lukman@student.smkmuhpakem.sch.id', jurusan: 'DPIB' }
     ];
     db.get('siswa').push(...siswaData).write();
 
@@ -132,104 +179,23 @@ async function seedData() {
         role: 'guru',
         nama: 'Ahmad Fauzi, M.Kom',
         refId: 'GRU-003'
-      },
-      {
-        id: 'USR-005',
-        username: 'andi',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Andi Pratama',
-        refId: 'SIS-001'
-      },
-      {
-        id: 'USR-006',
-        username: 'bella',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Bella Safitri',
-        refId: 'SIS-002'
-      },
-      {
-        id: 'USR-007',
-        username: 'citra',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Citra Dewi',
-        refId: 'SIS-003'
-      },
-      {
-        id: 'USR-008',
-        username: 'dedi',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Dedi Kurniawan',
-        refId: 'SIS-004'
-      },
-      {
-        id: 'USR-009',
-        username: 'eka',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Eka Putri',
-        refId: 'SIS-005'
-      },
-      {
-        id: 'USR-010',
-        username: 'fajar',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Fajar Nugroho',
-        refId: 'SIS-006'
-      },
-      {
-        id: 'USR-011',
-        username: 'galih',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Galih Pratomo',
-        refId: 'SIS-007'
-      },
-      {
-        id: 'USR-012',
-        username: 'hana',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Hana Maulida',
-        refId: 'SIS-008'
-      },
-      {
-        id: 'USR-013',
-        username: 'iqbal',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Iqbal Ramadhan',
-        refId: 'SIS-009'
-      },
-      {
-        id: 'USR-014',
-        username: 'jihan',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Jihan Anindya',
-        refId: 'SIS-010'
-      },
-      {
-        id: 'USR-015',
-        username: 'krisna',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Krisna Wijaya',
-        refId: 'SIS-011'
-      },
-      {
-        id: 'USR-016',
-        username: 'laila',
-        password: hashPassword('siswa123'),
-        role: 'siswa',
-        nama: 'Laila Fitriani',
-        refId: 'SIS-012'
       }
     ];
+
+    // Generate user untuk semua siswa secara otomatis
+    const guruCount = usersData.length;
+    siswaData.forEach((siswa, index) => {
+      const firstName = siswa.nama.toLowerCase().split(' ')[0];
+      usersData.push({
+        id: `USR-${String(guruCount + index + 1).padStart(3, '0')}`,
+        username: firstName,
+        password: hashPassword('siswa123'),
+        role: 'siswa',
+        nama: siswa.nama,
+        refId: siswa.id
+      });
+    });
+
     db.get('users').push(...usersData).write();
 
     console.log('✅ Database berhasil di-seed dengan data awal (v2)');

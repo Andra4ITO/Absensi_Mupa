@@ -372,10 +372,13 @@ async function prosesScanQR(sesiId, siswaId) {
     siswaId,
     siswaNama: siswa.nama,
     siswaNis: siswa.nis,
+    jurusan: siswa.jurusan || (db.get('kelas').find({ id: siswa.kelasId }).value() || {}).jurusan || '-',
     kelasId: siswa.kelasId,
     kelasNama: sesi.kelasNama,
     mapelId: sesi.mapelId,
     mapelNama: sesi.mapelNama,
+    status: 'Hadir',
+    keterangan: 'Presensi melalui scan QR Code',
     timestamp: now.toISOString(),
     tanggal: formatTanggal(now),
     jam: formatWaktu(now)

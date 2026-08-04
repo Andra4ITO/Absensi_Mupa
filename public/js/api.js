@@ -272,17 +272,38 @@ function formatWaktu(waktu) {
 }
 
 function getStatusBadge(status) {
-    const badges = {
+    // Badge untuk status sesi presensi
+    const sesiBadges = {
         'aktif': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
         'ditutup': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
         'expired': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     };
-    const statusMap = {
+    const sesiMap = {
         'aktif': 'Aktif',
         'ditutup': 'Ditutup',
         'expired': 'Expired'
     };
-    return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${badges[status] || 'bg-gray-100 text-gray-800'}">${statusMap[status] || status}</span>`;
+    
+    // Badge untuk status kehadiran siswa
+    const kehadiranBadges = {
+        'Hadir': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        'Izin': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+        'Sakit': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+        'Alpa': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+    };
+    
+    // Cek apakah status adalah status kehadiran siswa
+    if (kehadiranBadges[status]) {
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${kehadiranBadges[status]}">${status}</span>`;
+    }
+    
+    // Jika status sesi
+    if (sesiBadges[status]) {
+        return `<span class="px-2 py-1 rounded-full text-xs font-semibold ${sesiBadges[status]}">${sesiMap[status]}</span>`;
+    }
+    
+    // Default
+    return `<span class="px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">${status}</span>`;
 }
 
 function getMapelInitial(nama) {

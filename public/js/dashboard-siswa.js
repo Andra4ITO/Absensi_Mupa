@@ -173,6 +173,57 @@ function showScanInfo(qrData) {
     `;
 }
 
+// ===== AUDIO FEEDBACK (Web Audio API) =====
+let audioContext = null;
+
+// Memainkan suara sukses (chime modern) saat presensi berhasil
+function playSuccessSound() {
+    try {
+        // Inisialisasi AudioContext (lazy, setelah interaksi user)
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        const now = audioContext.currentTime;
+        
+        // Nada 1: C5 (523.25 Hz) - durasi 0.15s
+        playTone(523.25, now, 0.15, 0.25);
+        // Nada 2: E5 (659.25 Hz) - mulai 0.12s setelah nada 1
+        playTone(659.25, now + 0.12, 0.15, 0.25);
+        // Nada 3: G5 (783.99 Hz) - mulai 0.24s setelah nada 1
+        playTone(783.99, now + 0.24, 0.2, 0.3);
+        // Nada 4: C6 (1046.50 Hz) - mulai 0.36s setelah nada 1
+        playTone(1046.50, now + 0.36, 0.3, 0.35);
+    } catch (error) {
+        console.warn('Audio feedback tidak dapat diputar:', error);
+    }
+}
+
+// Helper untuk memainkan satu nada
+function playTone(frequency, startTime, duration, volume) {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, startTime);
+    
+    // Envelope: fade in & fade out agar terdengar halus
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+    gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration + 0.05);
+}
+
 // ===== HANDLE SCAN RESULT =====
 function handleScanResult(result) {
     const resultInfo = document.getElementById('scan-result-info');
@@ -193,7 +244,7 @@ function handleScanResult(result) {
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-lg p-4 space-y-2">
                 <div class="flex justify-between">
-                    <p class="text-xs text-gray-500 dark:text-gray-400">Siswa</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Nama Lengkap</p>
                     <p class="text-sm font-semibold text-gray-800 dark:text-white">${siswaUser.nama}</p>
                 </div>
                 <div class="flex justify-between">
@@ -201,8 +252,16 @@ function handleScanResult(result) {
                     <p class="text-sm font-semibold text-gray-800 dark:text-white">${siswaUser.siswa ? siswaUser.siswa.nis : '-'}</p>
                 </div>
                 <div class="flex justify-between">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Jurusan</p>
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white">${result.data && result.data.jurusan ? result.data.jurusan : (siswaUser.siswa ? siswaUser.siswa.jurusan : '-')}</p>
+                </div>
+                <div class="flex justify-between">
                     <p class="text-xs text-gray-500 dark:text-gray-400">Kelas</p>
                     <p class="text-sm font-semibold text-gray-800 dark:text-white">${siswaUser.kelas ? siswaUser.kelas.nama : '-'}</p>
+                </div>
+                <div class="flex justify-between">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
+                    <p class="text-sm font-semibold text-green-600 dark:text-green-400">${result.data && result.data.status ? result.data.status : 'Hadir'}</p>
                 </div>
                 <div class="flex justify-between">
                     <p class="text-xs text-gray-500 dark:text-gray-400">Jam</p>
@@ -216,6 +275,9 @@ function handleScanResult(result) {
         `;
         
         showToast(result.message, 'success');
+        
+        // Mainkan audio feedback sukses
+        playSuccessSound();
         
         // Refresh riwayat
         setTimeout(() => loadRiwayat(), 500);
@@ -272,19 +334,18 @@ async function loadRiwayat() {
         // Update tabel
         const tbody = document.getElementById('riwayat-body');
         if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500 dark:text-gray-400">Belum ada riwayat kehadiran</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-gray-500 dark:text-gray-400">Belum ada riwayat kehadiran</td></tr>';
         } else {
             tbody.innerHTML = data.map((item, index) => `
                 <tr class="table-row border-b border-gray-100 dark:border-gray-700">
                     <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${index + 1}</td>
                     <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${formatTanggal(item.tanggal)}</td>
                     <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${item.mapelNama}</td>
+                    <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${item.jurusan || '-'}</td>
                     <td class="py-3 px-4 text-gray-800 dark:text-gray-200">${item.guruNama || item.siswaNama || '-'}</td>
                     <td class="py-3 px-4 text-center text-gray-800 dark:text-gray-200">${item.jam}</td>
                     <td class="py-3 px-4 text-center">
-                        <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                            Hadir
-                        </span>
+                        ${getStatusBadge(item.status || 'Hadir')}
                     </td>
                 </tr>
             `).join('');
