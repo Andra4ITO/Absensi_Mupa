@@ -209,4 +209,4 @@ const PORT = process.env.PORT || 3000;
 
 ## 📝 Lisensi
 
-© 2024 SMKS Muhammadiyah Pakem. All rights reserved.
+© 2026 SMKS Muhammadiyah Pakem. All rights reserved.
