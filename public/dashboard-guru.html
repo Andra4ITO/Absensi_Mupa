@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Guru - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <link rel="icon" href="data:,">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,23 +12,18 @@
             theme: {
                 extend: {
                     colors: {
-                        muhammadiyah: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16'
-                        },
-                        emas: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706'
+                        navy: {
+                            50: '#EAF1F7',
+                            100: '#D9E5F0',
+                            200: '#BFD3E4',
+                            300: '#94B3D0',
+                            400: '#5F89AF',
+                            500: '#416F94',
+                            600: '#315A7D',
+                            700: '#274B69',
+                            800: '#1E3A5F',
+                            900: '#172F4D',
+                            950: '#102438'
                         }
                     }
                 }
@@ -41,190 +37,468 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .table-row:hover { background-color: rgba(0,0,0,0.02); }
-        .dark .table-row:hover { background-color: rgba(255,255,255,0.05); }
+        .table-row:hover { background-color: #F8FAFC; }
+        #qr-container canvas,
+        #qr-container img { max-width: 100%; height: auto; display: block; }
+
+        /* Sidebar: desktop collapse / mobile off-canvas */
+        @media (min-width: 1024px) {
+            #sidebar { transform: translateX(0); transition: transform 200ms ease; }
+            #sidebar.collapsed { transform: translateX(-100%); }
+            #main-wrapper { margin-left: 16rem; transition: margin-left 200ms ease; }
+            #main-wrapper.expanded { margin-left: 0; }
+        }
+        @media (max-width: 1023.98px) {
+            #sidebar { transform: translateX(-100%); transition: transform 200ms ease; }
+            #sidebar.open { transform: translateX(0); }
+        }
+
+        /* Sidebar menu */
+        .nav-link {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 0.8rem; border-radius: 0.5rem;
+            color: #BFD3E4; font-weight: 500; font-size: 0.875rem;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+        .nav-link:hover { background-color: rgba(255,255,255,0.07); color: #FFFFFF; }
+        .nav-link.nav-active { background-color: #315A7D; color: #FFFFFF; box-shadow: inset 3px 0 0 0 #EAF1F7; }
+        .nav-label {
+            padding: 0 0.8rem; margin-bottom: 0.35rem;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em;
+            text-transform: uppercase; color: #7FA3C4;
+        }
+
+        /* Form focus: primary navy (tanpa green) */
+        input:focus, select:focus {
+            outline: none; border-color: #315A7D;
+            box-shadow: 0 0 0 3px rgba(49,90,125,0.12);
+        }
     </style>
+    <!-- MUPA Design System (polish bersama: hover-lift, skeleton, modal-pop, animasi toast, focus ring) -->
+    <link rel="stylesheet" href="css/theme.css">
+
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+<body class="bg-white text-slate-800 min-h-screen">
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <!-- Header -->
-    <header class="bg-muhammadiyah-900 dark:bg-gray-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-emas-400 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-muhammadiyah-900" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
+    <!-- Overlay sidebar (mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ===== SIDEBAR (Soft Navy) ===== -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-navy-800 flex flex-col">
+        <div class="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
+            <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="font-bold text-white text-sm tracking-widest">MUPA</p>
+                <p class="text-[11px] text-navy-200 truncate">SMKS Muhammadiyah Pakem</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-6">
+            <div>
+                <p class="nav-label">Menu Utama</p>
+                <a href="#section-dashboard" data-title="Dashboard" class="nav-link nav-active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h4a1 1 0 001-1V10"/></svg>
+                    Dashboard
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Presensi</p>
+                <a href="#form-sesi-card" data-title="Buat Sesi Presensi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    Buat Sesi Presensi
+                </a>
+                <a href="#qr-sesi-card" data-title="QR Presensi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/></svg>
+                    QR Presensi
+                </a>
+                <a href="#daftar-hadir-card" data-title="Daftar Hadir" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    Daftar Hadir
+                </a>
+                <a href="#section-riwayat" data-title="Riwayat Sesi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Riwayat Sesi
+                </a>
+                <a href="#section-riwayat" data-title="Rekap" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Rekap
+                </a>
+            </div>
+        </nav>
+
+        <div class="border-t border-white/10 p-4 shrink-0">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 </div>
+                <div class="min-w-0">
+                    <p id="sidebar-user-name" class="text-sm font-semibold text-white truncate">Guru</p>
+                    <p class="text-[11px] text-navy-300">Guru Pengampu</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-navy-100 hover:text-white text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div id="main-wrapper" class="min-h-screen flex flex-col">
+        <!-- Topbar -->
+        <header class="h-16 sticky top-0 z-20 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" title="Buka / tutup menu" class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
                 <div>
-                    <h1 class="font-bold text-sm">SMKS Muhammadiyah Pakem</h1>
-                    <p class="text-xs text-muhammadiyah-300">Dashboard Guru</p>
+                    <p id="page-title" class="text-sm font-semibold text-slate-800 leading-tight">Dashboard</p>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Panel Guru - SMKS Muhammadiyah Pakem</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
-                <div class="hidden md:block text-right">
-                    <p id="user-name" class="text-sm font-semibold">Guru</p>
-                    <p class="text-xs text-muhammadiyah-300">Guru Pengampu</p>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="hidden md:flex items-center gap-2 pl-3 border-l border-slate-200">
+                    <div class="w-8 h-8 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                    <div>
+                        <p id="user-name" class="text-xs font-semibold text-slate-800 leading-tight">Guru</p>
+                        <p class="text-[10px] text-slate-400">Guru Pengampu</p>
+                    </div>
                 </div>
-                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    <span class="text-sm">Keluar</span>
+                <button onclick="logout()" title="Keluar" class="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-red-600 hover:bg-red-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                 </button>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto p-4 lg:p-8">
-        <!-- Grid Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- ===== KIRI: BUKA SESI + QR ===== -->
-            <div class="space-y-8">
-                <!-- Form Buka Sesi -->
-                <div id="form-sesi-card" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-muhammadiyah-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                        </svg>
-                        Buka Sesi Absensi
-                    </h2>
-                    
-                    <form id="form-buka-sesi" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mata Pelajaran</label>
-                            <select id="select-mapel" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                                <option value="">Pilih Mata Pelajaran</option>
-                            </select>
+        <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- ===== SECTION DASHBOARD ===== -->
+            <section id="section-dashboard" class="mb-8">
+                <h1 class="text-xl font-bold text-slate-800">Selamat Datang, <span id="guru-welcome">Guru</span></h1>
+                <p class="text-sm text-slate-500 mt-1 mb-6">Kelola presensi dan aktivitas pembelajaran Anda.</p>
+
+                <!-- Statistik -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-[#EAF1F7] text-navy-700 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kelas</label>
-                            <select id="select-kelas" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white">
-                                <option value="">Pilih Kelas</option>
-                            </select>
+                        <p class="text-xs font-medium text-slate-500">Total Sesi</p>
+                        <p id="guru-stat-sesi" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         </div>
-                        <button type="submit" class="w-full bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02]">
-                            Buka Sesi Presensi
-                        </button>
-                    </form>
+                        <p class="text-xs font-medium text-slate-500">Sesi Aktif</p>
+                        <p id="guru-stat-aktif" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Presensi</p>
+                        <p id="guru-stat-presensi" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16 5s3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Mata Pelajaran</p>
+                        <p id="guru-stat-mapel" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
                 </div>
 
-                <!-- QR Code Sesi Aktif -->
-                <div id="qr-sesi-card" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">QR Code Sesi Aktif</h2>
-                        <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full text-xs font-semibold animate-pulse">
-                            ● LIVE
-                        </span>
-                    </div>
-                    
-                    <div id="sesi-info" class="bg-muhammadiyah-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-sm font-semibold text-muhammadiyah-800 dark:text-white" id="sesi-mapel">-</p>
-                            <p class="text-xs text-muhammadiyah-600 dark:text-muhammadiyah-300" id="sesi-kode">-</p>
-                        </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Kelas: <span id="sesi-kelas">-</span></p>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Dibuka: <span id="sesi-waktu">-</span></p>
+                <!-- Aksi Cepat -->
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <a href="#form-sesi-card" class="flex items-center gap-2 px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Buat Sesi Presensi
+                    </a>
+                    <a href="#qr-sesi-card" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/></svg>
+                        QR Presensi
+                    </a>
+                    <a href="#section-riwayat" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Lihat Riwayat
+                    </a>
+                    <a href="#section-riwayat" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Lihat Rekap
+                    </a>
+                </div>
+            </section>
+
+            <!-- Presensi Aktif -->
+            <div id="guru-presensi-aktif" class="hidden mb-8"></div>
+
+            <!-- Grid Konten -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- ===== KIRI: BUKA SESI + QR ===== -->
+                <div class="space-y-8">
+                    <!-- Form Buka Sesi -->
+                    <div id="form-sesi-card" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                        <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <svg class="w-6 h-6 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
+                            </svg>
+                            Buka Sesi Absensi
+                        </h2>
+
+                        <form id="form-buka-sesi" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Mata Pelajaran</label>
+                                <select id="select-mapel" required class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                    <option value="">Pilih Mata Pelajaran</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Kelas</label>
+                                    <select id="select-kelas" required class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                        <option value="">Pilih</option>
+                                        <option value="X">X</option>
+                                        <option value="XI">XI</option>
+                                        <option value="XII">XII</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Jurusan</label>
+                                    <select id="select-jurusan" required class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                        <option value="">Pilih</option>
+                                        <option value="RPL">RPL</option>
+                                        <option value="TKJ">TKJ</option>
+                                        <option value="DKV">DKV</option>
+                                        <option value="AKL">AKL</option>
+                                        <option value="MPLB">MPLB</option>
+                                        <option value="OTKP">OTKP</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Tanggal</label>
+                                    <input type="date" id="select-tanggal" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Jam Mulai</label>
+                                    <input type="time" id="select-jam" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-2">Durasi QR (menit)</label>
+                                <select id="select-durasi" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                                    <option value="5">5 menit</option>
+                                    <option value="10" selected>10 menit</option>
+                                    <option value="15">15 menit</option>
+                                    <option value="30">30 menit</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full bg-navy-600 hover:bg-navy-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                                Buat Sesi &amp; Generate QR
+                            </button>
+                        </form>
                     </div>
 
-                    <div class="flex justify-center mb-4">
-                        <div id="qr-container" class="bg-white p-4 rounded-xl border-2 border-dashed border-muhammadiyah-300 dark:border-muhammadiyah-700">
-                            <img id="qr-image" src="" alt="QR Code" class="w-64 h-64">
+                    <!-- QR Code Sesi Aktif -->
+                    <div id="qr-sesi-card" class="hidden bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-lg font-bold text-slate-800">QR Code Sesi Aktif</h2>
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-semibold animate-pulse">
+                                LIVE
+                            </span>
+                        </div>
+
+                        <div id="sesi-info" class="bg-[#EAF1F7] border border-[#D9E5F0] rounded-lg p-4 mb-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm font-semibold text-navy-700" id="sesi-mapel">-</p>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold" id="sesi-status-label">Aktif</span>
+                            </div>
+                            <p class="text-sm text-slate-600">Kelas: <span id="sesi-kelas">-</span></p>
+                            <p class="text-sm text-slate-600">Tanggal: <span id="sesi-tanggal">-</span> | Jam: <span id="sesi-waktu">-</span></p>
+                            <p class="text-sm text-slate-600">Durasi: <span id="sesi-durasi">-</span> menit</p>
+                        </div>
+
+                        <!-- Countdown masa berlaku QR (live, dihitung dari expiresAt sesi) -->
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <span class="text-xs font-semibold text-slate-500">Sisa waktu</span>
+                            <span id="sesi-countdown" role="timer" aria-live="off"
+                                class="font-mono text-xl font-bold text-navy-700 px-3 py-1 rounded-lg bg-[#EAF1F7] border border-[#D9E5F0]">--:--</span>
+                        </div>
+
+                        <div class="flex justify-center mb-4">
+                            <div id="qr-container" class="bg-white p-4 rounded-xl border-2 border-dashed border-navy-200">
+                                <!-- QR dirender di sini oleh generateQR() -->
+                            </div>
+                        </div>
+
+                        <p class="text-center text-sm text-slate-500 mb-4">
+                            Scan QR untuk Presensi - berlaku <span id="sesi-durasi-hint">-</span> menit
+                        </p>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 text-center">
+                                <p class="text-sm text-slate-500">Total</p>
+                                <p id="stat-total" class="text-2xl font-bold text-slate-800">0</p>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 text-center">
+                                <p class="text-sm text-blue-600">Hadir</p>
+                                <p id="stat-hadir" class="text-2xl font-bold text-blue-700">0</p>
+                            </div>
+                            <div class="bg-amber-50 border border-amber-100 rounded-lg p-3 text-center">
+                                <p class="text-sm text-amber-600">Belum</p>
+                                <p id="stat-belum" class="text-2xl font-bold text-amber-700">0</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 mt-3">
+                            <button onclick="tutupSesi()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition">
+                                Tutup Sesi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== KANAN: DAFTAR HADIR + RIWAYAT ===== -->
+                <div class="space-y-8">
+                    <!-- Daftar Siswa Hadir -->
+                    <div id="daftar-hadir-card" class="hidden bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                        <h2 class="text-lg font-bold text-slate-800 mb-4">Daftar Siswa Hadir <span class="text-sm font-normal text-slate-500">(Real-time)</span></h2>
+                        <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                            <table class="w-full text-sm">
+                                <thead class="sticky top-0 bg-[#F8FAFC]">
+                                    <tr class="border-b border-[#E2E8F0]">
+                                        <th class="text-left py-3 px-4 text-slate-600 font-semibold">No</th>
+                                        <th class="text-left py-3 px-4 text-slate-600 font-semibold">NIS</th>
+                                        <th class="text-left py-3 px-4 text-slate-600 font-semibold">Nama</th>
+                                        <th class="text-center py-3 px-4 text-slate-600 font-semibold">Waktu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="daftar-hadir-body">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-slate-400">
+                                            Belum ada siswa yang hadir
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        Arahkan kamera siswa ke QR Code ini untuk presensi
-                    </p>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Siswa Hadir</p>
-                            <p id="jumlah-hadir" class="text-2xl font-bold text-muhammadiyah-600 dark:text-muhammadiyah-400">0</p>
+                    <!-- Riwayat Sesi -->
+                    <div id="section-riwayat" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                            <h2 class="text-lg font-bold text-slate-800">Riwayat &amp; Rekap Sesi</h2>
+                            <button onclick="exportRiwayatGuru()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Export CSV
+                            </button>
                         </div>
-                        <button onclick="tutupSesi()" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition">
-                            Tutup Sesi
-                        </button>
+                        <div class="grid grid-cols-3 gap-3 mb-5">
+                            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 text-center">
+                                <p class="text-xs text-slate-500">Total Sesi</p>
+                                <p id="guru-rekap-sesi" class="text-xl font-bold text-slate-800">0</p>
+                            </div>
+                            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 text-center">
+                                <p class="text-xs text-slate-500">Total Kehadiran</p>
+                                <p id="guru-rekap-kehadiran" class="text-xl font-bold text-slate-800">0</p>
+                            </div>
+                            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3 text-center">
+                                <p class="text-xs text-slate-500">Sesi Aktif</p>
+                                <p id="guru-rekap-aktif" class="text-xl font-bold text-slate-800">0</p>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                        <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mapel</th>
+                                        <th class="text-left py-3 px-4 text-slate-600 font-semibold">Kelas</th>
+                                        <th class="text-center py-3 px-4 text-slate-600 font-semibold">Status</th>
+                                        <th class="text-center py-3 px-4 text-slate-600 font-semibold">Hadir</th>
+                                        <th class="text-center py-3 px-4 text-slate-600 font-semibold">Waktu</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="riwayat-sesi-body">
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-slate-400">Memuat data...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <!-- ===== KANAN: DAFTAR HADIR REAL-TIME ===== -->
-            <div class="space-y-8">
-                <!-- Daftar Siswa Hadir -->
-                <div id="daftar-hadir-card" class="hidden bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Daftar Siswa Hadir <span class="text-sm font-normal text-gray-500">(Real-time)</span></h2>
-                    <div class="overflow-x-auto max-h-96 overflow-y-auto">
-                        <table class="w-full text-sm">
-                            <thead class="sticky top-0 bg-white dark:bg-gray-800">
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
-                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">NIS</th>
-                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Nama</th>
-                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jam</th>
-                                </tr>
-                            </thead>
-                            <tbody id="daftar-hadir-body">
-                                <tr>
-                                    <td colspan="4" class="text-center py-4 text-gray-500 dark:text-gray-400">
-                                        Belum ada siswa yang hadir
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Riwayat Sesi -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                    <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Riwayat Sesi Presensi</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-gray-200 dark:border-gray-700">
-                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
-                                    <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
-                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Status</th>
-                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Hadir</th>
-                                    <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Waktu</th>
-                                </tr>
-                            </thead>
-                            <tbody id="riwayat-sesi-body">
-                                <tr>
-                                    <td colspan="5" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+        </main>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Library QR global (window.QRCode, API constructor). CATATAN:
+         paket npm qrcode/lib/browser.min.js TIDAK memuat wrapper UMD
+         sehingga tidak bisa dipakai via tag <script> biasa. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/attendance.js"></script>
     <script src="js/dashboard-guru.js"></script>
+    <script src="js/sync-mapping.js"></script>
 
-    <!-- Firebase Database Layer (modular ESM via import maps) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-      }
-    }
+    <script>
+        // ===== UI SHELL (hanya tampilan - tidak menyentuh logika data) =====
+        (function () {
+            // Dashboard guru selalu light mode
+            document.documentElement.classList.remove('dark');
+
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            var wrapper = document.getElementById('main-wrapper');
+
+            window.toggleSidebar = function () {
+                if (!sidebar) return;
+                if (window.innerWidth >= 1024) {
+                    var collapsed = sidebar.classList.toggle('collapsed');
+                    if (wrapper) wrapper.classList.toggle('expanded', collapsed);
+                    if (overlay) overlay.classList.add('hidden');
+                } else {
+                    var open = sidebar.classList.toggle('open');
+                    if (overlay) overlay.classList.toggle('hidden', !open);
+                }
+            };
+
+            // Sinkronkan nama guru dari #user-name (diisi dashboard-guru.js)
+            var syncUser = function () {
+                var un = document.getElementById('user-name');
+                if (!un) return;
+                ['sidebar-user-name', 'guru-welcome'].forEach(function (id) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = un.textContent;
+                });
+            };
+            document.addEventListener('DOMContentLoaded', syncUser);
+
+            // Navigasi sidebar: highlight aktif + judul topbar
+            document.querySelectorAll('.nav-link').forEach(function (a) {
+                a.addEventListener('click', function () {
+                    document.querySelectorAll('.nav-link').forEach(function (x) { x.classList.remove('nav-active'); });
+                    a.classList.add('nav-active');
+                    var t = a.getAttribute('data-title');
+                    if (t) { var pt = document.getElementById('page-title'); if (pt) pt.textContent = t; }
+                    if (window.innerWidth < 1024 && sidebar.classList.contains('open')) window.toggleSidebar();
+                });
+            });
+        })();
     </script>
-    <script type="module" src="/src/models/firebase-bootstrap.js"></script>
 </body>
 </html>

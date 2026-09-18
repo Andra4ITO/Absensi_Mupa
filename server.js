@@ -34,10 +34,10 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files dari folder public
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve modul ESM dari folder src (untuk Firebase Database layer)
+// Serve modul ESM dari folder src (legacy — tidak lagi dipakai setelah Firebase dihapus)
 app.use('/src', express.static(path.join(__dirname, 'src')));
 
-// Serve node_modules untuk import maps Firebase modular SDK
+// Serve node_modules (legacy — tidak lagi dipakai setelah Firebase dihapus)
 app.use('/vendor', express.static(path.join(__dirname, 'node_modules')));
 
 // API Routes

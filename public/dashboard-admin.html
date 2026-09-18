@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <link rel="icon" href="data:,">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,23 +12,18 @@
             theme: {
                 extend: {
                     colors: {
-                        muhammadiyah: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16'
-                        },
-                        emas: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706'
+                        navy: {
+                            50: '#EAF1F7',
+                            100: '#D9E5F0',
+                            200: '#BFD3E4',
+                            300: '#94B3D0',
+                            400: '#5F89AF',
+                            500: '#416F94',
+                            600: '#315A7D',
+                            700: '#274B69',
+                            800: '#1E3A5F',
+                            900: '#172F4D',
+                            950: '#102438'
                         }
                     }
                 }
@@ -41,213 +37,736 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .table-row:hover { background-color: rgba(0,0,0,0.02); }
-        .dark .table-row:hover { background-color: rgba(255,255,255,0.05); }
+        .table-row:hover { background-color: #F8FAFC; }
+
+        /* Sidebar: desktop collapse / mobile off-canvas */
+        @media (min-width: 1024px) {
+            #sidebar { transform: translateX(0); transition: transform 200ms ease; }
+            #sidebar.collapsed { transform: translateX(-100%); }
+            #main-wrapper { margin-left: 16rem; transition: margin-left 200ms ease; }
+            #main-wrapper.expanded { margin-left: 0; }
+        }
+        @media (max-width: 1023.98px) {
+            #sidebar { transform: translateX(-100%); transition: transform 200ms ease; }
+            #sidebar.open { transform: translateX(0); }
+        }
+
+        /* Sidebar menu */
+        .nav-link {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 0.8rem; border-radius: 0.5rem;
+            color: #BFD3E4; font-weight: 500; font-size: 0.875rem;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+        .nav-link:hover { background-color: rgba(255,255,255,0.07); color: #FFFFFF; }
+        .nav-link.nav-active { background-color: #315A7D; color: #FFFFFF; box-shadow: inset 3px 0 0 0 #EAF1F7; }
+        .nav-label {
+            padding: 0 0.8rem; margin-bottom: 0.35rem;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em;
+            text-transform: uppercase; color: #7FA3C4;
+        }
+
+        /* Form focus: primary navy (tanpa green) */
+        input:focus, select:focus {
+            outline: none; border-color: #315A7D;
+            box-shadow: 0 0 0 3px rgba(49,90,125,0.12);
+        }
     </style>
+    <!-- MUPA Design System (polish bersama: hover-lift, skeleton, modal-pop, animasi toast, focus ring) -->
+    <link rel="stylesheet" href="css/theme.css">
+
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+<body class="bg-white text-slate-800 min-h-screen">
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <!-- Header -->
-    <header class="bg-muhammadiyah-900 dark:bg-gray-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+    <!-- Overlay sidebar (mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ===== SIDEBAR (Soft Navy) ===== -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-navy-800 flex flex-col">
+        <div class="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
+            <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <p class="font-bold text-white text-sm tracking-widest">MUPA</p>
+                <p class="text-[11px] text-navy-200 truncate">SMKS Muhammadiyah Pakem</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-6">
+            <div>
+                <p class="nav-label">Menu Utama</p>
+                <a href="#section-dashboard" data-title="Dashboard" class="nav-link nav-active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h4a1 1 0 001-1V10"/></svg>
+                    Dashboard
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Data Master</p>
+                <a href="#section-user-management" data-title="Data Siswa" data-role="siswa" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    Data Siswa
+                </a>
+                <a href="#section-user-management" data-title="Data Guru" data-role="guru" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Data Guru
+                </a>
+                <a href="#section-rekap-mapel" data-title="Mata Pelajaran" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16 5s3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    Mata Pelajaran
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Presensi</p>
+                <a href="#section-rekap-mapel" data-title="Rekap Kehadiran" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Rekap Kehadiran
+                </a>
+                <a href="#section-rekap-detail" data-title="Detail Presensi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    Detail Presensi
+                </a>
+                <a href="#section-sesi-aktif" data-title="Sesi Presensi Aktif" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Sesi Presensi Aktif
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Sistem</p>
+                <a href="#section-user-management" data-title="Manajemen Pengguna" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.426 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.426.427 1.426 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.427 1.426-2.925 1.426-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.426-.427-1.426-2.925 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 013 3z"/></svg>
+                    Manajemen Pengguna
+                </a>
+                <a href="#section-pengaturan" data-title="Pengaturan" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.426 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.426.427 1.426 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.427 1.426-2.925 1.426-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.426-.427-1.426-2.925 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 013 3z"/></svg>
+                    Pengaturan
+                </a>
+            </div>
+        </nav>
+
+        <div class="border-t border-white/10 p-4 shrink-0">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <p id="sidebar-user-name" class="text-sm font-semibold text-white truncate">Admin</p>
+                    <p class="text-[11px] text-navy-300">Administrator</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-navy-100 hover:text-white text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div id="main-wrapper" class="min-h-screen flex flex-col">
+        <!-- Topbar -->
+        <header class="h-16 sticky top-0 z-20 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-emas-400 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-muhammadiyah-900" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
+                <button onclick="toggleSidebar()" title="Buka / tutup menu" class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div>
+                    <p id="page-title" class="text-sm font-semibold text-slate-800 leading-tight">Dashboard</p>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Panel Administrator - SMKS Muhammadiyah Pakem</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button class="relative p-2 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition" title="Notifikasi">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a3 3 0 10-6 0v.159A6.002 6.002 0 006 11v2.159c0 .538.214 1.055.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1h6z"/></svg>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-400"></span>
+                </button>
+                <div class="hidden md:flex items-center gap-2 pl-3 border-l border-slate-200">
+                    <div class="w-8 h-8 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    </div>
+                    <div>
+                        <p id="user-name" class="text-xs font-semibold text-slate-800 leading-tight">Admin</p>
+                        <p class="text-[10px] text-slate-400">Administrator</p>
+                    </div>
+                </div>
+                <button onclick="logout()" title="Keluar" class="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-red-600 hover:bg-red-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- ===== SECTION DASHBOARD ===== -->
+            <section id="section-dashboard" class="mb-10">
+                <h1 class="text-xl font-bold text-slate-800">Selamat datang kembali, <span id="welcome-name">Admin</span></h1>
+                <p class="text-sm text-slate-500 mt-1 mb-6">Ringkasan aktivitas presensi digital sekolah.</p>
+
+                <!-- Statistik -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16 5s3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Siswa</p>
+                        <p id="stat-siswa" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Guru</p>
+                        <p id="stat-guru" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16 5s3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Mata Pelajaran</p>
+                        <p id="stat-mapel" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in">
+                        <div class="w-9 h-9 rounded-lg bg-[#EAF1F7] text-navy-700 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Sesi Aktif</p>
+                        <p id="stat-sesi-aktif" class="text-2xl font-bold text-navy-700 mt-1">0</p>
+                    </div>
+                </div>
+
+                <!-- Presensi Hari Ini -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                    <div class="bg-white border border-[#E2E8F0] rounded-lg p-3 text-center">
+                        <p class="text-[11px] text-slate-500">Presensi Hari Ini</p>
+                        <p id="adm-presensi-hari" class="text-xl font-bold text-indigo-600">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-lg p-3 text-center">
+                        <p class="text-[11px] text-slate-500">Hadir</p>
+                        <p id="adm-hadir" class="text-xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-lg p-3 text-center">
+                        <p class="text-[11px] text-slate-500">Izin</p>
+                        <p id="adm-izin" class="text-xl font-bold text-amber-600">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-lg p-3 text-center">
+                        <p class="text-[11px] text-slate-500">Sakit</p>
+                        <p id="adm-sakit" class="text-xl font-bold text-orange-600">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-lg p-3 text-center">
+                        <p class="text-[11px] text-slate-500">Tidak Hadir</p>
+                        <p id="adm-alpa" class="text-xl font-bold text-red-500">0</p>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button type="button" onclick="openQuickUser('siswa')" class="flex items-center gap-2 px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Data Siswa
+                    </button>
+                    <button type="button" onclick="openQuickUser('guru')" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Data Guru
+                    </button>
+                    <button type="button" onclick="openUserModal()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Tambah Pengguna
+                    </button>
+                </div>
+
+                <!-- Grafik Kehadiran 7 Hari -->
+                <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-bold text-slate-800">Grafik Kehadiran 7 Hari Terakhir</h2>
+                        <span class="text-xs text-slate-400">Data presensi lokal</span>
+                    </div>
+                    <div id="adm-grafik" class="flex items-end gap-2 h-40">
+                        <p class="text-sm text-slate-400 m-auto">Memuat grafik...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: REKAP KEHADIRAN PER MAPEL ===== -->
+            <section id="section-rekap-mapel" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-800">Rekap Kehadiran per Mata Pelajaran</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <select id="filter-bulan" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Bulan</option>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                        <select id="filter-tahun" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Tahun</option>
+                        </select>
+                        <button onclick="loadRekapMapel()" class="px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                            Filter
+                        </button>
+                        <button type="button" id="export-rekap-mapel-pdf-btn" title="Unduh Rekap per Mata Pelajaran (PDF)"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-2 1.5l2.5 2.5V2m-2 1.5l2.5 2.5m-4-4l4 4m-4-4l-4 4m4 0l4-4m0 6l2 4z"/></svg>
+                            Download PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">No</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mata Pelajaran</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Guru</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Jumlah Sesi</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Total Kehadiran</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Siswa Unik</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rekap-mapel-body">
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-slate-400">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: DETAIL REKAP PRESENSI ===== -->
+            <section id="section-rekap-detail" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-800">Detail Rekap Presensi</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <input type="date" id="filter-tanggal" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                        <select id="filter-mapel" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Mapel</option>
+                        </select>
+                        <select id="filter-kelas" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Kelas</option>
+                        </select>
+                        <select id="filter-jurusan" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Jurusan</option>
+                        </select>
+                        <select id="filter-guru" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Guru</option>
+                        </select>
+                        <select id="filter-status" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Status</option>
+                        </select>
+                        <button onclick="loadRekapDetail()" class="px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                            Filter
+                        </button>
+                    <button type="button" onclick="exportRekapDetailCsv()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Export CSV
+                    </button>
+                    <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        Print
+                    </button>
+                    <button type="button" id="export-attendance-pdf-btn" title="Unduh Detail Rekap Presensi (PDF)"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-2 1.5l2.5 2.5V2m-2 1.5l2.5 2.5m-4-4l4 4m-4-4l-4 4m4 0l4-4m0 6l2 4z"/></svg>
+                        Download PDF
+                    </button>
+                    </div>
+                </div>
+
+                <!-- Statistik Detail -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-4 text-center">
+                        <p class="text-sm text-slate-500">Total Catatan</p>
+                        <p id="rekap-stat-total" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-[#EAF1F7] border border-[#D9E5F0] rounded-lg p-4 text-center">
+                        <p class="text-sm text-navy-600">Siswa Hadir (Unik)</p>
+                        <p id="rekap-stat-siswa" class="text-2xl font-bold text-navy-700 mt-1">0</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">No</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">NIS</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Nama Siswa</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mapel</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Kelas</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Jurusan</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Guru</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Tanggal</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Jam</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rekap-detail-body">
+                            <tr>
+                                <td colspan="10" class="text-center py-4 text-slate-400">Pilih filter untuk melihat detail</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: SESI PRESENSI AKTIF (MONITORING REAL-TIME) ===== -->
+            <section id="section-sesi-aktif" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">
+                    Sesi Presensi Aktif
+                    <span class="ml-2 px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-full text-xs font-semibold animate-pulse">LIVE</span>
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Guru</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mapel</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Kelas</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Hadir</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Dibuka</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sesi-aktif-body">
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-slate-400">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <!-- ===== SECTION: MANAJEMEN PENGGUNA ===== -->
+            <section id="section-user-management" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Manajemen Pengguna</h2>
+                        <p class="text-sm text-slate-500">Kelola akun Guru dan Siswa</p>
+                    </div>
+                    <button onclick="openUserModal()"
+                        class="flex items-center gap-2 px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Tambah Pengguna
+                    </button>
+                </div>
+
+                <!-- Statistik Pengguna -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-4 text-center">
+                        <p class="text-sm text-slate-500">Total Pengguna</p>
+                        <p id="mng-total" class="text-3xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-100 rounded-lg p-4 text-center">
+                        <p class="text-sm text-amber-600">Total Siswa</p>
+                        <p id="mng-siswa" class="text-3xl font-bold text-amber-700 mt-1">0</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-center">
+                        <p class="text-sm text-blue-600">Total Guru</p>
+                        <p id="mng-guru" class="text-3xl font-bold text-blue-700 mt-1">0</p>
+                    </div>
+                </div>
+
+                <!-- Search + Filter -->
+                <div class="flex flex-col md:flex-row md:items-center gap-3 mb-4">
+                    <input type="text" id="user-search" placeholder="Cari nama/NIS/kelas/jurusan..."
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                    <select id="user-filter-role" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                        <option value="">Semua Role</option>
+                        <option value="siswa">Siswa</option>
+                        <option value="guru">Guru</option>
+                    </select>
+                    <select id="user-filter-kelas" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                        <option value="">Semua Kelas</option>
+                        <option value="X">X</option>
+                        <option value="XI">XI</option>
+                        <option value="XII">XII</option>
+                    </select>
+                    <select id="user-filter-jurusan" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                        <option value="">Semua Jurusan</option>
+                        <option value="RPL">RPL</option>
+                        <option value="TKJ">TKJ</option>
+                        <option value="DKV">DKV</option>
+                        <option value="AKL">AKL</option>
+                        <option value="MPLB">MPLB</option>
+                        <option value="OTKP">OTKP</option>
+                    </select>
+                    <select id="user-filter-status" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Nonaktif</option>
+                    </select>
+                    <button type="button" id="user-filter-reset"
+                        class="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        Reset
+                    </button>
+                    <button type="button" id="export-students-pdf-btn" title="Unduh Data Siswa (PDF)"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-2 1.5l2.5 2.5V2m-2 1.5l2.5 2.5m-4-4l4 4m-4-4l-4 4m4 0l4-4m0 6l2 4z"/></svg>
+                        PDF Siswa
+                    </button>
+                    <button type="button" id="export-teachers-pdf-btn" title="Unduh Data Guru (PDF)"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-2 1.5l2.5 2.5V2m-2 1.5l2.5 2.5m-4-4l4 4m-4-4l-4 4m4 0l4-4m0 6l2 4z"/></svg>
+                        PDF Guru
+                    </button>
+                </div>
+
+                <!-- Tabel Pengguna -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">No</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Nama</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">NIS/NIP</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Kelas</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Jurusan</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mata Pelajaran</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Role</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Status</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: PENGATURAN SEKOLAH ===== -->
+            <section id="section-pengaturan" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-1">
+                    <h2 class="text-lg font-bold text-slate-800">Pengaturan Sekolah</h2>
+                    <button type="button" id="export-master-pdf-btn" title="Unduh Data Master: Mata Pelajaran, Kelas, Jurusan (PDF)"
+                        class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-2 1.5l2.5 2.5V2m-2 1.5l2.5 2.5m-4-4l4 4m-4-4l-4 4m4 0l4-4m0 6l2 4z"/></svg>
+                        PDF Data Master
+                    </button>
+                </div>
+                <p class="text-sm text-slate-500 mb-6">Konfigurasi identitas sekolah &amp; parameter presensi (disimpan lokal: mupa_settings). Koordinat dipakai geofencing presensi parkir siswa.</p>
+                <form id="settings-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="settings-nama" class="block text-sm font-medium text-slate-700 mb-2">Nama Sekolah</label>
+                        <input type="text" id="settings-nama" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                    </div>
+                    <div>
+                        <label for="settings-jam" class="block text-sm font-medium text-slate-700 mb-2">Jam Masuk</label>
+                        <input type="time" id="settings-jam" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                    </div>
+                    <div>
+                        <label for="settings-lat" class="block text-sm font-medium text-slate-700 mb-2">Latitude Sekolah</label>
+                        <input type="number" step="any" id="settings-lat" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono">
+                    </div>
+                    <div>
+                        <label for="settings-lng" class="block text-sm font-medium text-slate-700 mb-2">Longitude Sekolah</label>
+                        <input type="number" step="any" id="settings-lng" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono">
+                    </div>
+                    <div>
+                        <label for="settings-radius" class="block text-sm font-medium text-slate-700 mb-2">Radius Presensi Parkir (meter)</label>
+                        <input type="number" min="10" id="settings-radius" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                    </div>
+                    <div>
+                        <label for="settings-durasi" class="block text-sm font-medium text-slate-700 mb-2">Durasi QR Default (menit)</label>
+                        <select id="settings-durasi" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                            <option value="5">5 menit</option>
+                            <option value="10">10 menit</option>
+                            <option value="15">15 menit</option>
+                            <option value="30">30 menit</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" id="settings-save" class="bg-navy-600 hover:bg-navy-700 text-white font-semibold py-2 px-6 rounded-lg transition">Simpan Pengaturan</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- ===== SECTION: AKTIVITAS TERBARU ===== -->
+            <section id="section-aktivitas" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Aktivitas Terbaru</h2>
+                    <span class="text-xs text-slate-400">Sumber: mupa_activity_log</span>
+                </div>
+                <div id="aktivitas-body" class="space-y-2"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Manajemen Pengguna (Tambah / Edit) -->
+    <div id="user-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40" onclick="closeUserModal()"></div>
+        <div class="relative bg-white border border-[#E2E8F0] rounded-2xl shadow-xl w-full max-w-md p-6">
+            <button onclick="closeUserModal()" class="absolute top-3 right-3 p-1 rounded-lg hover:bg-slate-100">
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <h3 id="user-modal-title" class="text-lg font-bold text-slate-800 mb-4">Tambah Pengguna</h3>
+            <form id="user-form" class="space-y-4">
+                <div>
+                    <label for="user-form-role" class="block text-sm font-medium text-slate-700 mb-2">Role</label>
+                    <select id="user-form-role" required class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="siswa">Siswa</option>
+                        <option value="guru">Guru</option>
+                    </select>
                 </div>
                 <div>
-                    <h1 class="font-bold text-sm">SMKS Muhammadiyah Pakem</h1>
-                    <p class="text-xs text-muhammadiyah-300">Dashboard Admin</p>
+                    <label for="user-form-nama" class="block text-sm font-medium text-slate-700 mb-2">Nama Lengkap</label>
+                    <input type="text" id="user-form-nama" required
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
+                        placeholder="Nama Lengkap">
+                </div>
+                <div>
+                    <label for="user-form-nis" class="block text-sm font-medium text-slate-700 mb-2">NIS / NIP</label>
+                    <input type="text" id="user-form-nis" required
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
+                        placeholder="NIS / NIP">
+                </div>
+                <!-- Field Mata Pelajaran yang Diajar (khusus Guru) -->
+                <div id="user-form-subjects">
+                    <label for="user-form-subjects-select" class="block text-sm font-medium text-slate-700 mb-2">Mata Pelajaran yang Diajar</label>
+                    <select id="user-form-subjects-select" multiple size="5"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                    </select>
+                    <p class="text-xs text-slate-400 mt-1">Gunakan Ctrl (Windows) / Cmd (Mac) untuk memilih lebih dari satu.</p>
+                </div>
+                <div id="user-form-academic" class="grid grid-cols-2 gap-3">
+                <div>
+                    <label for="user-form-kelas" class="block text-sm font-medium text-slate-700 mb-2">Kelas</label>
+                    <select id="user-form-kelas" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="">Pilih</option>
+                        <option value="X">X</option>
+                        <option value="XI">XI</option>
+                        <option value="XII">XII</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="user-form-jurusan" class="block text-sm font-medium text-slate-700 mb-2">Jurusan</label>
+                    <select id="user-form-jurusan" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="">Pilih</option>
+                        <option value="RPL">RPL</option>
+                        <option value="TKJ">TKJ</option>
+                        <option value="DKV">DKV</option>
+                        <option value="AKL">AKL</option>
+                        <option value="MPLB">MPLB</option>
+                        <option value="OTKP">OTKP</option>
+                    </select>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
-                <div class="hidden md:block text-right">
-                    <p id="user-name" class="text-sm font-semibold">Admin</p>
-                    <p class="text-xs text-muhammadiyah-300">Administrator</p>
+            <div>
+                    <label for="user-form-status" class="block text-sm font-medium text-slate-700 mb-2">Status</label>
+                    <select id="user-form-status" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Nonaktif</option>
+                    </select>
                 </div>
-                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    <span class="text-sm">Keluar</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto p-4 lg:p-8">
-        <!-- Statistik Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total Siswa</p>
-                <p id="stat-siswa" class="text-3xl font-bold text-gray-800 dark:text-white mt-2">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total Guru</p>
-                <p id="stat-guru" class="text-3xl font-bold text-muhammadiyah-600 dark:text-muhammadiyah-400 mt-2">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Mata Pelajaran</p>
-                <p id="stat-mapel" class="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">0</p>
-            </div>
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Sesi Aktif</p>
-                <p id="stat-sesi-aktif" class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">0</p>
-            </div>
-        </div>
-
-        <!-- Rekap Per Mapel -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Rekap Kehadiran per Mata Pelajaran</h2>
                 <div class="flex gap-3">
-                    <select id="filter-bulan" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Bulan</option>
-                        <option value="1">Januari</option>
-                        <option value="2">Februari</option>
-                        <option value="3">Maret</option>
-                        <option value="4">April</option>
-                        <option value="5">Mei</option>
-                        <option value="6">Juni</option>
-                        <option value="7">Juli</option>
-                        <option value="8">Agustus</option>
-                        <option value="9">September</option>
-                        <option value="10">Oktober</option>
-                        <option value="11">November</option>
-                        <option value="12">Desember</option>
-                    </select>
-                    <select id="filter-tahun" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Tahun</option>
-                    </select>
-                    <button onclick="loadRekapMapel()" class="px-4 py-2 bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white rounded-lg text-sm font-semibold transition">
-                        Filter
-                    </button>
+                    <button type="button" onclick="closeUserModal()"
+                        class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2 px-4 rounded-lg transition">Batal</button>
+                    <button type="submit" id="user-form-submit"
+                        class="flex-1 bg-navy-600 hover:bg-navy-700 text-white font-bold py-2 px-4 rounded-lg transition">Simpan Pengguna</button>
                 </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mata Pelajaran</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Guru</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jumlah Sesi</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Total Kehadiran</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Siswa Unik</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rekap-mapel-body">
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            </form>
         </div>
+    </div>
 
-        <!-- Detail Rekap Presensi -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Detail Rekap Presensi</h2>
-                <div class="flex flex-wrap gap-3">
-                    <input type="date" id="filter-tanggal" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                    <select id="filter-mapel" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Mapel</option>
-                    </select>
-                    <select id="filter-kelas" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Kelas</option>
-                    </select>
-                    <button onclick="loadRekapDetail()" class="px-4 py-2 bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white rounded-lg text-sm font-semibold transition">
-                        Filter
-                    </button>
-                </div>
-            </div>
-
-            <!-- Statistik Detail -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Catatan</p>
-                    <p id="rekap-stat-total" class="text-2xl font-bold text-gray-800 dark:text-white">0</p>
-                </div>
-                <div class="bg-green-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-green-600 dark:text-green-400">Siswa Hadir (Unik)</p>
-                    <p id="rekap-stat-siswa" class="text-2xl font-bold text-green-700 dark:text-white">0</p>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">NIS</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Nama Siswa</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Tanggal</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jam</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rekap-detail-body">
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-gray-500 dark:text-gray-400">Pilih filter untuk melihat detail</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <!-- Modal Detail Pengguna -->
+    <div id="user-detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/40" onclick="closeUserDetail()"></div>
+        <div class="relative bg-white border border-[#E2E8F0] rounded-2xl shadow-xl w-full max-w-md p-6">
+            <button onclick="closeUserDetail()" class="absolute top-3 right-3 p-1 rounded-lg hover:bg-slate-100">
+                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Detail Pengguna</h3>
+            <div id="user-detail-body" class="space-y-2"></div>
+            <button onclick="closeUserDetail()" class="w-full mt-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-2 px-4 rounded-lg transition">Tutup</button>
         </div>
-
-        <!-- Sesi Aktif (Monitoring Real-time) -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
-                Sesi Presensi Aktif
-                <span class="ml-2 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-full text-xs font-semibold animate-pulse">● LIVE</span>
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Guru</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mapel</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Kelas</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Hadir</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Dibuka</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sesi-aktif-body">
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/attendance.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.31/dist/jspdf.plugin.autotable.min.js"></script>
     <script src="js/dashboard-admin.js"></script>
+    <script src="js/sync-mapping.js"></script>
 
-    <!-- Firebase Database Layer (modular ESM via import maps) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-      }
-    }
+    <!-- Supabase: library via CDN + koneksi/connection test (console-only).
+         Tidak mengubah fitur aplikasi - data tetap localStorage. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+
+    <script>
+        // ===== UI SHELL (hanya tampilan - tidak menyentuh logika data) =====
+        (function () {
+            // Dashboard admin selalu light mode
+            document.documentElement.classList.remove('dark');
+
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            var wrapper = document.getElementById('main-wrapper');
+
+            window.toggleSidebar = function () {
+                if (!sidebar) return;
+                if (window.innerWidth >= 1024) {
+                    var collapsed = sidebar.classList.toggle('collapsed');
+                    if (wrapper) wrapper.classList.toggle('expanded', collapsed);
+                    if (overlay) overlay.classList.add('hidden');
+                } else {
+                    var open = sidebar.classList.toggle('open');
+                    if (overlay) overlay.classList.toggle('hidden', !open);
+                }
+            };
+
+            // Sinkronkan nama user ke sidebar & sambutan (sumber: #user-name oleh dashboard-admin.js)
+            var syncUser = function () {
+                var un = document.getElementById('user-name');
+                if (!un) return;
+                var sb = document.getElementById('sidebar-user-name');
+                var wc = document.getElementById('welcome-name');
+                if (sb) sb.textContent = un.textContent;
+                if (wc) wc.textContent = un.textContent;
+            };
+            document.addEventListener('DOMContentLoaded', syncUser);
+
+            // Navigasi sidebar: highlight aktif + judul topbar + prefilter role
+            document.querySelectorAll('.nav-link').forEach(function (a) {
+                a.addEventListener('click', function () {
+                    document.querySelectorAll('.nav-link').forEach(function (x) { x.classList.remove('nav-active'); });
+                    a.classList.add('nav-active');
+                    var t = a.getAttribute('data-title');
+                    if (t) { var pt = document.getElementById('page-title'); if (pt) pt.textContent = t; }
+                    var role = a.getAttribute('data-role');
+                    if (role) {
+                        var sel = document.getElementById('user-filter-role');
+                        if (sel) sel.value = role;
+                        if (typeof renderUserTable === 'function') renderUserTable();
+                    }
+                    if (window.innerWidth < 1024 && sidebar.classList.contains('open')) window.toggleSidebar();
+                });
+            });
+
+            // Quick action: tambah siswa/guru dengan role sudah terpilih
+            window.openQuickUser = function (role) {
+                if (typeof openUserModal === 'function') openUserModal();
+                var sel = document.getElementById('user-form-role');
+                if (sel) sel.value = role;
+                if (typeof toggleAcademicFields === 'function') toggleAcademicFields();
+            };
+        })();
     </script>
-    <script type="module" src="/src/models/firebase-bootstrap.js"></script>
 </body>
 </html>

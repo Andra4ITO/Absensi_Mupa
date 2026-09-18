@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Siswa - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <link rel="icon" href="data:,">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,23 +12,18 @@
             theme: {
                 extend: {
                     colors: {
-                        muhammadiyah: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16'
-                        },
-                        emas: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706'
+                        navy: {
+                            50: '#EAF1F7',
+                            100: '#D9E5F0',
+                            200: '#BFD3E4',
+                            300: '#94B3D0',
+                            400: '#5F89AF',
+                            500: '#416F94',
+                            600: '#315A7D',
+                            700: '#274B69',
+                            800: '#1E3A5F',
+                            900: '#172F4D',
+                            950: '#102438'
                         }
                     }
                 }
@@ -41,205 +37,650 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .table-row:hover { background-color: rgba(0,0,0,0.02); }
-        .dark .table-row:hover { background-color: rgba(255,255,255,0.05); }
+        .table-row:hover { background-color: #F8FAFC; }
         #qr-reader video { border-radius: 12px; }
         #qr-reader { border: none !important; }
+
+        /* Sidebar: desktop collapse / mobile off-canvas */
+        @media (min-width: 1024px) {
+            #sidebar { transform: translateX(0); transition: transform 200ms ease; }
+            #sidebar.collapsed { transform: translateX(-100%); }
+            #main-wrapper { margin-left: 16rem; transition: margin-left 200ms ease; }
+            #main-wrapper.expanded { margin-left: 0; }
+        }
+        @media (max-width: 1023.98px) {
+            #sidebar { transform: translateX(-100%); transition: transform 200ms ease; }
+            #sidebar.open { transform: translateX(0); }
+        }
+
+        /* Sidebar menu */
+        .nav-link {
+            display: flex; align-items: center; gap: 0.65rem;
+            padding: 0.55rem 0.8rem; border-radius: 0.5rem;
+            color: #BFD3E4; font-weight: 500; font-size: 0.875rem;
+            transition: background-color 200ms ease, color 200ms ease;
+        }
+        .nav-link:hover { background-color: rgba(255,255,255,0.07); color: #FFFFFF; }
+        .nav-link.nav-active { background-color: #315A7D; color: #FFFFFF; box-shadow: inset 3px 0 0 0 #EAF1F7; }
+        .nav-label {
+            padding: 0 0.8rem; margin-bottom: 0.35rem;
+            font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em;
+            text-transform: uppercase; color: #7FA3C4;
+        }
+
+        /* Form focus: primary navy (tanpa green) */
+        input:focus, select:focus {
+            outline: none; border-color: #315A7D;
+            box-shadow: 0 0 0 3px rgba(49,90,125,0.12);
+        }
     </style>
+    <link rel="stylesheet" href="css/theme.css">
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen">
+<body class="bg-white text-slate-800 min-h-screen">
     <!-- Toast Container -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <!-- Header -->
-    <header class="bg-muhammadiyah-900 dark:bg-gray-800 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-emas-400 flex items-center justify-center">
-                    <svg class="w-6 h-6 text-muhammadiyah-900" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-sm">SMKS Muhammadiyah Pakem</h1>
-                    <p class="text-xs text-muhammadiyah-300">Dashboard Siswa</p>
-                </div>
+    <!-- Overlay sidebar (mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- ===== SIDEBAR (Soft Navy) ===== -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-navy-800 flex flex-col">
+        <div class="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
+            <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                    </svg>
-                </button>
-                <button onclick="logout()" class="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    <span class="text-sm">Keluar</span>
-                </button>
+            <div class="min-w-0">
+                <p class="font-bold text-white text-sm tracking-widest">MUPA</p>
+                <p class="text-[11px] text-navy-200 truncate">SMKS Muhammadiyah Pakem</p>
             </div>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto p-4 lg:p-8">
-        <!-- Profile Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-            <div class="flex flex-col md:flex-row md:items-center gap-6">
-                <div class="flex items-center gap-4">
-                    <div class="w-20 h-20 rounded-full bg-muhammadiyah-100 dark:bg-muhammadiyah-900 flex items-center justify-center">
-                        <span id="user-initial" class="text-3xl font-bold text-muhammadiyah-700 dark:text-muhammadiyah-300">A</span>
+        <nav class="flex-1 overflow-y-auto py-5 px-3 space-y-6">
+            <div>
+                <p class="nav-label">Menu Utama</p>
+                <a href="#section-dashboard" data-title="Dashboard" class="nav-link nav-active">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h4a1 1 0 001-1V10"/></svg>
+                    Dashboard
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Presensi</p>
+                <a href="#section-scan" data-title="Scan QR Presensi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/></svg>
+                    Scan QR Presensi
+                </a>
+                <a href="#section-riwayat" data-title="Riwayat Presensi" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Riwayat Presensi
+                </a>
+            </div>
+            <div>
+                <p class="nav-label">Parkir</p>
+                <a href="#section-parkir" data-title="Presensi Parkir" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                    Presensi Parkir
+                </a>
+                <a href="#karcis-anchor" data-title="Karcis Parkir" class="nav-link">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                    Karcis Parkir
+                </a>
+            </div>
+        </nav>
+
+        <div class="border-t border-white/10 p-4 shrink-0">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                    <span id="sidebar-user-initial" class="text-sm font-bold text-white">S</span>
+                </div>
+                <div class="min-w-0">
+                    <p id="sidebar-user-name" class="text-sm font-semibold text-white truncate">Siswa</p>
+                    <p class="text-[11px] text-navy-300">Siswa</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-navy-100 hover:text-white text-sm font-medium transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Keluar
+            </button>
+        </div>
+    </aside>
+
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div id="main-wrapper" class="min-h-screen flex flex-col">
+        <!-- Topbar -->
+        <header class="h-16 sticky top-0 z-20 bg-white border-b border-[#E2E8F0] flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" title="Buka / tutup menu" class="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+                <div>
+                    <p id="page-title" class="text-sm font-semibold text-slate-800 leading-tight">Dashboard</p>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Panel Siswa - SMKS Muhammadiyah Pakem</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="hidden md:flex items-center gap-2 pl-3 border-l border-slate-200">
+                    <div class="w-8 h-8 rounded-full bg-navy-600 flex items-center justify-center shrink-0">
+                        <span id="topbar-user-initial" class="text-xs font-bold text-white">S</span>
                     </div>
                     <div>
-                        <h2 id="user-name" class="text-2xl font-bold text-gray-800 dark:text-white">Nama Siswa</h2>
-                        <p id="user-nis" class="text-gray-500 dark:text-gray-400">NIS: -</p>
-                        <p id="user-kelas" class="text-muhammadiyah-600 dark:text-muhammadiyah-400 font-semibold">Kelas: -</p>
+                        <p id="topbar-user-name" class="text-xs font-semibold text-slate-800 leading-tight">Siswa</p>
+                        <p id="topbar-user-kelas" class="text-[10px] text-slate-400">Siswa</p>
                     </div>
                 </div>
-                <div class="flex-1 md:text-right">
-                    <p id="current-date" class="text-gray-500 dark:text-gray-400"></p>
-                    <p id="current-time" class="text-4xl font-bold text-muhammadiyah-700 dark:text-muhammadiyah-400 mt-2"></p>
+                <button onclick="logout()" title="Keluar" class="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-red-600 hover:bg-red-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- ===== SECTION DASHBOARD ===== -->
+            <section id="section-dashboard" class="mb-8">
+                <div class="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm p-6 sm:p-8 animate-fade-in">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">Selamat datang kembali, <span id="siswa-welcome">Siswa</span> <span aria-hidden="true">👋</span></h1>
+                    <p class="text-sm text-slate-500 mt-1">Kelola presensi dan aktivitas sekolah kamu dengan mudah.</p>
+                    <div class="flex flex-wrap gap-2 mt-4">
+                        <span id="sw-chip-nis" class="inline-flex items-center px-3 py-1 rounded-full bg-[#EAF1F7] text-navy-700 text-xs font-semibold">NIS: -</span>
+                        <span id="sw-chip-kelas" class="inline-flex items-center px-3 py-1 rounded-full bg-[#EAF1F7] text-navy-700 text-xs font-semibold">Kelas: -</span>
+                        <span id="sw-chip-jurusan" class="inline-flex items-center px-3 py-1 rounded-full bg-[#EAF1F7] text-navy-700 text-xs font-semibold">Jurusan: -</span>
+                    </div>
+                </div>
+
+                <!-- Menu Utama (Quick Actions) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 mb-8">
+                    <button type="button" onclick="openScanner()"
+                        class="hover-lift text-left bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 transition">
+                        <div class="w-10 h-10 rounded-lg bg-[#EAF1F7] text-navy-700 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/></svg>
+                        </div>
+                        <p class="font-bold text-slate-800 text-sm">Scan QR Presensi</p>
+                        <p class="text-xs text-slate-500 mt-1">Buka kamera untuk absensi QR</p>
+                    </button>
+                    <a href="#section-parkir" class="hover-lift block bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 transition">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                        </div>
+                        <p class="font-bold text-slate-800 text-sm">Absensi Parkir</p>
+                        <p class="text-xs text-slate-500 mt-1">Catat kehadiran parkir via GPS</p>
+                    </a>
+                    <a href="#section-riwayat" class="hover-lift block bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 transition">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="font-bold text-slate-800 text-sm">Riwayat Presensi</p>
+                        <p class="text-xs text-slate-500 mt-1">Lihat riwayat kehadiran kamu</p>
+                    </a>
+                </div>
+
+                <!-- Statistik -->
+                <div id="sw-presensi-status" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] text-sm text-slate-600 mb-5">
+                    <span id="sw-presensi-dot" class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span id="sw-presensi-status-text">Memeriksa presensi hari ini...</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-[#EAF1F7] text-navy-700 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Kehadiran Hari Ini</p>
+                        <p id="sw-hari-ini" class="text-2xl font-bold text-slate-800 mt-1">-</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Hadir</p>
+                        <p id="stat-total" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Izin</p>
+                        <p id="sw-total-izin" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Total Sakit</p>
+                        <p id="sw-total-sakit" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Tidak Hadir</p>
+                        <p id="sw-total-alpa" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16 5s3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Mata Pelajaran</p>
+                        <p id="stat-mapel" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                    <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-5 animate-fade-in hover-lift">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <p class="text-xs font-medium text-slate-500">Kehadiran Bulan Ini</p>
+                        <p id="stat-bulan" class="text-2xl font-bold text-slate-800 mt-1">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Card -->
+            <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-center gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 rounded-full bg-[#EAF1F7] flex items-center justify-center">
+                            <span id="user-initial" class="text-3xl font-bold text-navy-700">A</span>
+                        </div>
+                        <div>
+                            <h2 id="user-name" class="text-2xl font-bold text-slate-800">Nama Siswa</h2>
+                            <p id="user-nis" class="text-slate-500">NIS: -</p>
+                            <p id="user-kelas" class="text-navy-600 font-semibold">Kelas: -</p>
+                        </div>
+                    </div>
+                    <div class="flex-1 md:text-right">
+                        <p id="current-date" class="text-slate-500"></p>
+                        <p id="current-time" class="text-4xl font-bold text-navy-700 mt-2"></p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Scan QR Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-            <h2 class="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                <svg class="w-6 h-6 text-muhammadiyah-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/>
-                </svg>
-                Scan QR Code Presensi
-            </h2>
-            
-            <!-- Status Siaga -->
-            <div id="scan-status" class="bg-muhammadiyah-50 dark:bg-gray-700 rounded-lg p-4 mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
-                    <p class="text-sm text-muhammadiyah-800 dark:text-white font-semibold">Kamera siap. Arahkan ke QR Code yang ditampilkan guru.</p>
+            <!-- ===== RINGKASAN KEHADIRAN (progress bar - data asli) ===== -->
+            <div class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Ringkasan Kehadiran</h2>
+                    <span class="text-xs text-slate-400">Seluruh riwayat presensi</span>
+                </div>
+                <div id="sw-ringkasan-empty" class="hidden text-center py-6">
+                    <div class="w-12 h-12 mx-auto rounded-full bg-[#EAF1F7] flex items-center justify-center mb-3">
+                        <svg class="w-6 h-6 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-6m3 6v-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-600">Belum ada data</p>
+                    <p class="text-xs text-slate-400 mt-1">Data akan muncul setelah kamu melakukan presensi.</p>
+                </div>
+                <div id="sw-ringkasan-body" class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Hadir</span><span id="sw-count-hadir" class="font-semibold text-slate-800">0</span></div>
+                        <div class="bar-track"><div id="sw-bar-hadir" style="width:0%;background:#315A7D" class="bar-fill"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Izin</span><span id="sw-count-izin" class="font-semibold text-slate-800">0</span></div>
+                        <div class="bar-track"><div id="sw-bar-izin" style="width:0%;background:#4F46E5" class="bar-fill"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Sakit</span><span id="sw-count-sakit" class="font-semibold text-slate-800">0</span></div>
+                        <div class="bar-track"><div id="sw-bar-sakit" style="width:0%;background:#EA580C" class="bar-fill"></div></div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">Tidak Hadir</span><span id="sw-count-alpa" class="font-semibold text-slate-800">0</span></div>
+                        <div class="bar-track"><div id="sw-bar-alpa" style="width:0%;background:#DC2626" class="bar-fill"></div></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- QR Scanner -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <div id="qr-reader" class="w-full max-w-sm mx-auto"></div>
-                    <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                        Posisikan QR Code di dalam bingkai kamera
-                    </p>
+            <!-- ===== SECTION: SCAN QR ===== -->
+            <section id="section-scan" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/>
+                    </svg>
+                                    Scan QR Code Presensi
+                </h2>
+
+                <!-- Card IDLE: Absensi QR (kamera TIDAK otomatis aktif) -->
+                <div id="scan-idle-card">
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-8 text-center">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-[#EAF1F7] flex items-center justify-center mb-4">
+                            <svg class="w-9 h-9 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800">Absensi QR</h3>
+                        <p class="text-sm text-slate-500 mt-1 mb-6">Scan QR Code dari guru untuk melakukan absensi.</p>
+                        <button id="start-scan-btn" type="button" class="inline-flex items-center gap-2 px-6 py-3 bg-navy-600 hover:bg-navy-700 text-white font-semibold rounded-xl transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 4h.01M6 4h4v4H6V4zm10 0h4v4h-4V4zM6 16h4v4H6v-4zm10 0h4v4h-4v-4z"/></svg>
+                            Scan QR untuk Absen
+                        </button>
+                    </div>
                 </div>
-                
+
                 <!-- Hasil Scan -->
-                <div id="scan-result-card" class="hidden">
-                    <div id="scan-result-content" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 animate-fade-in">
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Hasil Scan</h3>
+                <div id="scan-result-card" class="hidden mt-4">
+                    <div id="scan-result-content" class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-6 animate-fade-in">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4">Hasil Scan</h3>
                         <div id="scan-result-info" class="space-y-3">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Menunggu hasil scan...</p>
+                            <p class="text-sm text-slate-500">Menunggu hasil scan...</p>
+                        </div>
+                        <button id="btn-scan-lagi" class="hidden w-full mt-4 bg-navy-600 hover:bg-navy-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                            Scan Lagi
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Auto-fill -->
+                <div class="mt-6 bg-blue-50 border border-blue-100 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-semibold text-blue-800">Sistem Auto-Fill</p>
+                            <p class="text-sm text-blue-700">
+                                Setelah scan berhasil, sistem otomatis mencocokkan akun Anda (Nama, NIS, Kelas) dan mencatat kehadiran secara instan tanpa input manual.
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
+                            </section>
 
-            <!-- Info Auto-fill -->
-            <div class="mt-6 bg-blue-50 dark:bg-gray-700 rounded-lg p-4">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <!-- ===== SECTION: ABSENSI PARKIR (MAPS) ===== -->
+            <section id="section-parkir" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 mb-8 animate-fade-in">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H5a2 2 0 00-2-2V7a2 2 0 012-2h7m0 0v5m0-5l4 4m-4-4l-4 4m4 0v13"/>
                     </svg>
-                    <div>
-                        <p class="text-sm font-semibold text-blue-800 dark:text-blue-300">Sistem Auto-Fill</p>
-                        <p class="text-sm text-blue-700 dark:text-blue-400">
-                            Setelah scan berhasil, sistem otomatis mencocokkan akun Anda (Nama, NIS, Kelas) dan mencatat kehadiran secara instan tanpa input manual.
-                        </p>
+                    Absensi Parkir (Maps)
+                </h2>
+
+                <!-- Titik Sekolah Resmi -->
+                <div class="bg-[#EAF1F7] border border-[#D9E5F0] rounded-xl p-4 mb-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-navy-700 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-slate-800">SMKS Muhammadiyah Pakem</p>
+                            <p class="text-xs text-slate-500 mt-0.5">Jl. Pakem-Turi KM 0,5, Pakem Binangun, Kec. Pakem, Kab. Sleman, Daerah Istimewa Yogyakarta</p>
+                            <p class="text-[11px] text-slate-400 mt-1 font-mono">-7.663035, 110.4143683</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Riwayat Presensi -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 animate-fade-in">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <h2 class="text-lg font-bold text-gray-800 dark:text-white">Riwayat Kehadiran</h2>
-                <div class="flex gap-3">
-                    <select id="filter-bulan" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Bulan</option>
-                        <option value="1">Januari</option>
-                        <option value="2">Februari</option>
-                        <option value="3">Maret</option>
-                        <option value="4">April</option>
-                        <option value="5">Mei</option>
-                        <option value="6">Juni</option>
-                        <option value="7">Juli</option>
-                        <option value="8">Agustus</option>
-                        <option value="9">September</option>
-                        <option value="10">Oktober</option>
-                        <option value="11">November</option>
-                        <option value="12">Desember</option>
-                    </select>
-                    <select id="filter-tahun" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white text-sm">
-                        <option value="">Semua Tahun</option>
-                    </select>
-                    <button onclick="loadRiwayat()" class="px-4 py-2 bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white rounded-lg text-sm font-semibold transition">
-                        Filter
+                <!-- Status Parkir (GPS nyata) -->
+                <div id="parking-status" class="bg-[#EAF1F7] border border-[#D9E5F0] rounded-lg p-4 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div id="parking-status-dot" class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></div>
+                        <p id="parking-status-text" class="text-sm text-navy-700 font-semibold">Menunggu lokasi Anda...</p>
+                    </div>
+                </div>
+
+                <!-- Maps Container -->
+                <div class="mb-3">
+                    <div id="parking-map" class="w-full h-80 md:h-[420px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg overflow-hidden">
+                        <p class="text-slate-400 p-4">Memuat peta...</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2">
+                        <a id="parking-gmaps-link" href="https://www.google.com/maps/search/?api=1&query=SMK+Muhammadiyah+Pakem" target="_blank" rel="noopener"
+                           class="inline-flex items-center gap-1.5 text-sm font-medium text-navy-600 hover:text-navy-700 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Lihat di Google Maps
+                        </a>
+                        <span id="parking-gmaps-note" class="text-xs text-slate-400"></span>
+                    </div>
+                </div>
+
+                <!-- Detail GPS -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+                        <p class="text-[11px] text-slate-500">Latitude</p>
+                        <p id="gps-lat" class="text-sm font-semibold text-slate-800 font-mono">-</p>
+                    </div>
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+                        <p class="text-[11px] text-slate-500">Longitude</p>
+                        <p id="gps-lng" class="text-sm font-semibold text-slate-800 font-mono">-</p>
+                    </div>
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+                        <p class="text-[11px] text-slate-500">Akurasi GPS</p>
+                        <p id="gps-acc" class="text-sm font-semibold text-slate-800">-</p>
+                    </div>
+                    <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+                        <p class="text-[11px] text-slate-500">Jarak ke sekolah</p>
+                        <p id="gps-dist" class="text-sm font-semibold text-slate-800">-</p>
+                    </div>
+                </div>
+
+                <!-- Tombol Absensi Parkir -->
+                <div class="flex flex-col md:flex-row gap-3">
+                    <button id="btn-gps-refresh" type="button" onclick="refreshGpsLocation()"
+                        class="md:flex-none bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-lg transition">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span id="btn-gps-refresh-label">Perbarui Lokasi</span>
+                        </span>
+                    </button>
+                    <button id="btn-parking-absen" onclick="absensiParking()" disabled
+                        class="flex-1 bg-navy-600 hover:bg-navy-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 0l-7 7m7-7l7 7"/>
+                            </svg>
+                            Absensi Parkir Sekarang
+                        </span>
+                    </button>
+                    <button onclick="cekRiwayatParking()"
+                        class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3 px-4 rounded-lg transition">
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Riwayat Parkir
+                        </span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Statistik -->
-            <div class="grid grid-cols-3 gap-4 mb-6">
-                <div class="bg-green-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-green-600 dark:text-green-400">Total Hadir</p>
-                    <p id="stat-total" class="text-2xl font-bold text-green-700 dark:text-white">0</p>
+                <!-- Hasil Absensi Parkir -->
+                <div id="parking-result" class="hidden mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-blue-800" id="parking-result-msg">Absensi parkir berhasil!</p>
+                            <p class="text-sm text-blue-700" id="parking-result-detail"></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-blue-600 dark:text-blue-400">Mata Pelajaran</p>
-                    <p id="stat-mapel" class="text-2xl font-bold text-blue-700 dark:text-white">0</p>
-                </div>
-                <div class="bg-muhammadiyah-50 dark:bg-gray-700 rounded-lg p-4 text-center">
-                    <p class="text-sm text-muhammadiyah-600 dark:text-muhammadiyah-400">Kehadiran Bulan Ini</p>
-                    <p id="stat-bulan" class="text-2xl font-bold text-muhammadiyah-700 dark:text-white">0</p>
-                </div>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">No</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Tanggal</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Mata Pelajaran</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Jurusan</th>
-                            <th class="text-left py-3 px-4 text-gray-600 dark:text-gray-300">Guru</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Jam</th>
-                            <th class="text-center py-3 px-4 text-gray-600 dark:text-gray-300">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="riwayat-body">
-                        <tr>
-                            <td colspan="7" class="text-center py-4 text-gray-500 dark:text-gray-400">Memuat data...</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <!-- Karcis Parkir Digital (Masuk / Keluar) -->
+                <div id="karcis-anchor" class="border-t border-[#E2E8F0] mt-6 pt-6">
+                    <h3 class="text-md font-bold text-slate-800 mb-3">
+                        Karcis Parkir Digital
+                    </h3>
+
+                    <!-- Input Plat Nomor -->
+                    <div class="flex flex-col md:flex-row gap-3 mb-4">
+                        <input type="text" id="parkir-plat" maxlength="12"
+                            class="flex-1 px-3 py-2 border border-slate-300 rounded-lg bg-white uppercase"
+                            placeholder="Plat nomor, contoh: AB 1234 CD">
+                        <button onclick="parkirMasuk()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition whitespace-nowrap">
+                            KENDARAAN MASUK
+                        </button>
+                        <button onclick="karcisKeluar()"
+                            class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-lg transition whitespace-nowrap">
+                            KENDARAAN KELUAR
+                        </button>
+                    </div>
+
+                    <!-- Kartu Karcis -->
+                    <div id="karcis-card" class="hidden"></div>
+                </div>
+            </section>
+
+            <!-- ===== SECTION: RIWAYAT PRESENSI ===== -->
+            <section id="section-riwayat" class="bg-white border border-[#E2E8F0] rounded-xl shadow-sm p-6 animate-fade-in">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <h2 class="text-lg font-bold text-slate-800">Riwayat Kehadiran</h2>
+                    <div class="flex flex-wrap gap-3">
+                        <select id="filter-bulan" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Bulan</option>
+                            <option value="1">Januari</option>
+                            <option value="2">Februari</option>
+                            <option value="3">Maret</option>
+                            <option value="4">April</option>
+                            <option value="5">Mei</option>
+                            <option value="6">Juni</option>
+                            <option value="7">Juli</option>
+                            <option value="8">Agustus</option>
+                            <option value="9">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Desember</option>
+                        </select>
+                        <select id="filter-tahun" class="px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm">
+                            <option value="">Semua Tahun</option>
+                        </select>
+                        <button onclick="loadRiwayat()" class="px-4 py-2 bg-navy-600 hover:bg-navy-700 text-white rounded-lg text-sm font-semibold transition">
+                            Filter
+                        </button>
+                        <button type="button" onclick="exportRiwayatSiswa()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Export CSV
+                        </button>
+                        <button type="button" onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-semibold transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            Print
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto hidden md:block">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-[#F8FAFC] border-b border-[#E2E8F0]">
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">No</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Tanggal</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Mata Pelajaran</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Jurusan</th>
+                                <th class="text-left py-3 px-4 text-slate-600 font-semibold">Guru</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Jam</th>
+                                <th class="text-center py-3 px-4 text-slate-600 font-semibold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="riwayat-body">
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-slate-400">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Tampilan mobile: card list (tanpa horizontal scroll) -->
+                <div id="riwayat-mobile" class="md:hidden space-y-3"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Scanner QR (hanya muncul saat tombol Scan ditekan) -->
+    <div id="scanner-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 overlay-in" onclick="closeScanner()"></div>
+        <div class="relative bg-white border border-[#E2E8F0] rounded-2xl shadow-xl w-full max-w-md p-6 modal-pop">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-800">Scan QR Absensi</h3>
+                <button id="close-scanner-btn" type="button" title="Tutup Scanner" class="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
+            <div class="flex items-center gap-2 mb-3 text-sm text-slate-600">
+                <span id="scanner-status-dot" class="w-3 h-3 rounded-full bg-amber-500"></span>
+                <span id="scanner-status-text">Menyiapkan kamera...</span>
+            </div>
+            <div id="qr-reader" class="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl overflow-hidden"></div>
+            <p class="text-center text-sm text-slate-500 mt-3">Arahkan kamera ke QR Code absensi dari guru.</p>
+            <button id="close-scanner-main" type="button" class="w-full mt-5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-2.5 rounded-xl transition">
+                Tutup Scanner
+            </button>
         </div>
-    </main>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/attendance.js"></script>
     <script src="js/dashboard-siswa.js"></script>
+    <script src="js/sync-mapping.js"></script>
 
-    <!-- Firebase Database Layer (modular ESM via import maps) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-      }
-    }
+    <script>
+        // ===== UI SHELL (hanya tampilan - tidak menyentuh logika data) =====
+        (function () {
+            // Dashboard siswa selalu light mode
+            document.documentElement.classList.remove('dark');
+
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            var wrapper = document.getElementById('main-wrapper');
+
+            window.toggleSidebar = function () {
+                if (!sidebar) return;
+                if (window.innerWidth >= 1024) {
+                    var collapsed = sidebar.classList.toggle('collapsed');
+                    if (wrapper) wrapper.classList.toggle('expanded', collapsed);
+                    if (overlay) overlay.classList.add('hidden');
+                } else {
+                    var open = sidebar.classList.toggle('open');
+                    if (overlay) overlay.classList.toggle('hidden', !open);
+                }
+            };
+
+            // Sinkronkan identitas dari elemen yang diisi dashboard-siswa.js
+            var syncUser = function () {
+                var un = document.getElementById('user-name');
+                if (un) {
+                    var t = document.getElementById('topbar-user-name');
+                    var sb = document.getElementById('sidebar-user-name');
+                    var wc = document.getElementById('siswa-welcome');
+                    if (t) t.textContent = un.textContent;
+                    if (sb) sb.textContent = un.textContent;
+                    if (wc) wc.textContent = un.textContent;
+                }
+                var ini = document.getElementById('user-initial');
+                var sbi = document.getElementById('sidebar-user-initial');
+                if (ini && sbi) sbi.textContent = ini.textContent;
+                var tbi = document.getElementById('topbar-user-initial');
+                if (ini && tbi) tbi.textContent = ini.textContent;
+                var uk = document.getElementById('user-kelas');
+                var tuk = document.getElementById('topbar-user-kelas');
+                if (uk && tuk) tuk.textContent = uk.textContent;
+
+                // Chips identitas pada welcome section (data aktual, tanpa dummy)
+                var unis = document.getElementById('user-nis');
+                var chipNis = document.getElementById('sw-chip-nis');
+                if (chipNis) chipNis.textContent = unis ? unis.textContent.replace(/^NIS:\s*/, 'NIS: ') || 'NIS: -' : 'NIS: -';
+                var chipKelas = document.getElementById('sw-chip-kelas');
+                if (chipKelas) chipKelas.textContent = uk ? uk.textContent.replace(/^Kelas:\s*/, 'Kelas: ') || 'Kelas: -' : 'Kelas: -';
+                var chipJur = document.getElementById('sw-chip-jurusan');
+                if (chipJur) {
+                    var j = '-';
+                    try { if (typeof siswaUser !== 'undefined' && siswaUser && siswaUser.jurusan) j = siswaUser.jurusan; } catch (e) {}
+                    chipJur.textContent = 'Jurusan: ' + j;
+                }
+            };
+            document.addEventListener('DOMContentLoaded', syncUser);
+
+            // Navigasi sidebar: highlight aktif + judul topbar
+            document.querySelectorAll('.nav-link').forEach(function (a) {
+                a.addEventListener('click', function () {
+                    document.querySelectorAll('.nav-link').forEach(function (x) { x.classList.remove('nav-active'); });
+                    a.classList.add('nav-active');
+                    var t = a.getAttribute('data-title');
+                    if (t) { var pt = document.getElementById('page-title'); if (pt) pt.textContent = t; }
+                    if (window.innerWidth < 1024 && sidebar.classList.contains('open')) window.toggleSidebar();
+                });
+            });
+        })();
     </script>
-    <script type="module" src="/src/models/firebase-bootstrap.js"></script>
 </body>
 </html>

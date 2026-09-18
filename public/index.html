@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sistem Presensi Digital SMKS Muhammadiyah Pakem</title>
+    <link rel="icon" href="data:,">
+    <!-- preload foto pertama + stylesheet slideshow login -->
+    <link rel="preload" as="image" href="assets/school-1.jpeg" fetchpriority="high">
+    <link rel="preload" as="image" href="assets/logo-1.png">
+    <link rel="stylesheet" href="css/login.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,23 +16,18 @@
             theme: {
                 extend: {
                     colors: {
-                        muhammadiyah: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                            950: '#052e16'
-                        },
-                        emas: {
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706'
+                        navy: {
+                            50: '#EAF1F7',
+                            100: '#D9E5F0',
+                            200: '#BFD3E4',
+                            300: '#94B3D0',
+                            400: '#5F89AF',
+                            500: '#416F94',
+                            600: '#315A7D',
+                            700: '#274B69',
+                            800: '#1E3A5F',
+                            900: '#172F4D',
+                            950: '#102438'
                         }
                     }
                 }
@@ -35,145 +35,222 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .bg-pattern {
-            background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
-            background-size: 20px 20px;
-        }
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-pulse-slow {
-            animation: pulseSlow 2s ease-in-out infinite;
-        }
-        @keyframes pulseSlow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        input:focus {
+            outline: none; border-color: #315A7D;
+            box-shadow: 0 0 0 3px rgba(49,90,125,0.15);
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-muhammadiyah-900 via-muhammadiyah-800 to-muhammadiyah-950 dark:from-gray-900 dark:via-gray-800 dark:to-gray-950 flex items-center justify-center p-4">
-    
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 bg-pattern pointer-events-none"></div>
-
-    <!-- Toast Container -->
+<body class="bg-[#EAF1F7] text-[#1E293B]">
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
-    <!-- Login Card -->
-    <div class="relative w-full max-w-md animate-fade-in">
-        <!-- Logo & Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-lg border-2 border-emas-400 shadow-lg mb-4">
-                <svg class="w-12 h-12 text-emas-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-            </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Sistem Presensi Digital</h1>
-            <p class="text-muhammadiyah-200 text-lg">SMKS Muhammadiyah Pakem</p>
-            <p class="text-muhammadiyah-300 text-sm mt-2">"Menuntut Ilmu adalah Kewajiban"</p>
+    <!-- ===================================================================
+         LAYOUT SPLIT SCREEN
+         Desktop : KIRI = slideshow foto sekolah (tinggi penuh, sticky)
+                   KANAN = panel biru (logo -> judul -> form login ->
+                           program keahlian -> tagline)
+         Mobile  : satu kolom (slideshow -> logo -> judul -> form -> jurusan)
+         =================================================================== -->
+    <div class="mupa-shell">
+
+    <!-- ===== KIRI: SLIDESHOW FOTO SEKOLAH ===== -->
+    <header class="mupa-banner"
+        aria-label="Galeri foto SMK Muhammadiyah Pakem" data-slideshow>
+
+        <div class="absolute inset-0">
+            <figure class="mupa-slide mupa-slide--1 is-active" data-slide>
+                <img src="assets/school-1.jpeg" alt="Foto SMK Muhammadiyah Pakem"
+                    width="4160" height="2340" fetchpriority="high" decoding="async">
+            </figure>
+            <figure class="mupa-slide mupa-slide--2" data-slide>
+                <img data-src="assets/school-2.jpeg" alt="Foto SMK Muhammadiyah Pakem"
+                    width="2268" height="4032" decoding="async">
+            </figure>
+            <figure class="mupa-slide mupa-slide--3" data-slide>
+                <img data-src="assets/school-3.jpeg" alt="Foto SMK Muhammadiyah Pakem"
+                    width="4032" height="2268" decoding="async">
+            </figure>
         </div>
 
-        <!-- Login Form Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 backdrop-blur-lg bg-opacity-95 dark:bg-opacity-95">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">Masuk ke Akun</h2>
-            
-            <form id="login-form" class="space-y-4">
-                <!-- Username -->
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Username</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                        </div>
-                        <input type="text" id="username" name="username" required
-                            class="w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-muhammadiyah-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition"
-                            placeholder="Masukkan username">
-                    </div>
-                </div>
+        <!-- overlay sangat ringan: foto tetap terang, hanya untuk kontras indicator & tombol -->
+        <div class="mupa-scrim absolute inset-0 pointer-events-none"></div>
+<!-- Overlay teks pada slideshow: nama sekolah + nama sistem -->
+        <div class="mupa-caption absolute top-3 left-3 sm:top-4 sm:left-4 z-10">
+            <p class="mupa-caption__school">SMK Muhammadiyah Pakem</p>
+            <p class="mupa-caption__system">Sistem Presensi Digital MUPA</p>
+        </div>
 
-                <!-- Password -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                            </svg>
+        <!-- tombol navigasi foto sebelumnya / berikutnya (kecil, tidak mengganggu foto) -->
+        <button type="button" class="mupa-nav absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-20"
+            data-slide-prev aria-label="Foto sebelumnya" title="Foto sebelumnya">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button type="button" class="mupa-nav absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-20"
+            data-slide-next aria-label="Foto berikutnya" title="Foto berikutnya">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+
+        <!-- indicator 3 foto di bagian bawah banner (bisa diklik untuk berpindah foto) -->
+        <div class="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2"
+            role="group" aria-label="Pilih foto galeri sekolah">
+            <button type="button" class="mupa-dot is-active" data-slide-dot="0"
+                aria-label="Tampilkan foto 1: Foto SMK Muhammadiyah Pakem" aria-current="true"></button>
+            <button type="button" class="mupa-dot" data-slide-dot="1"
+                aria-label="Tampilkan foto 2: Foto SMK Muhammadiyah Pakem"></button>
+            <button type="button" class="mupa-dot" data-slide-dot="2"
+                aria-label="Tampilkan foto 3: Foto SMK Muhammadiyah Pakem"></button>
+        </div>
+    </header>
+
+    <!-- ===== KANAN: PANEL BIRU (logo -> judul -> form login -> program keahlian -> tagline) ===== -->
+    <main class="mupa-panel">
+        <!-- dekorasi halus (murni CSS, tidak mengganggu form) -->
+        <div class="mupa-panel__deco" aria-hidden="true"></div>
+
+        <div class="mupa-panel__inner animate-fade-in">
+
+            <!-- logo sekolah: paling atas panel kanan (plate putih tipis agar logo tetap terbaca) -->
+            <div class="flex justify-center">
+                <span class="mupa-logo-plate">
+                    <img src="assets/logo-1.png" alt="Logo SMK Muhammadiyah Pakem" width="60" height="60"
+                        decoding="async" class="mupa-logo h-16 w-16 sm:h-20 sm:w-20 lg:h-[84px] lg:w-[84px]">
+                </span>
+            </div>
+
+            <div class="text-center mt-4 sm:mt-5">
+                <h1 class="text-[22px] sm:text-2xl lg:text-[27px] font-bold tracking-tight leading-tight text-white">Sistem Presensi Digital MUPA</h1>
+                <p class="text-[13px] sm:text-sm font-medium text-[#C7D8E8] mt-1.5">SMK Muhammadiyah Pakem</p>
+<p class="mupa-subtitle">Portal Presensi Digital Sekolah</p>
+                <p class="text-[12.5px] sm:text-[13px] text-[#A9C3DA] mt-2.5 max-w-[380px] mx-auto leading-relaxed">
+                    Kelola kehadiran sekolah dengan lebih mudah, cepat, dan terintegrasi.
+                </p>
+            </div>
+
+            <!-- card login -->
+            <div class="mupa-card mt-6 sm:mt-7">
+                <p class="text-center text-sm text-[#64748B]">Masuk ke akun Anda</p>
+
+                <form id="login-form" class="mt-5 space-y-5">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-[#1E293B] mb-2">Username / NIS / Kode Guru</label>
+                            <input type="text" id="username" autocomplete="username"
+                                class="w-full px-4 py-2.5 border border-[#E2E8F0] rounded-xl bg-white text-sm text-[#1E293B] placeholder-slate-400 transition"
+                                placeholder="Masukkan username atau NIS" required>
                         </div>
-                        <input type="password" id="password" name="password" required
-                            class="w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-muhammadiyah-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition"
-                            placeholder="Masukkan password">
-                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-[#1E293B] mb-2">Password</label>
+                            <div class="relative">
+                                <input type="password" id="password" autocomplete="current-password"
+                                    class="w-full px-4 py-2.5 pr-11 border border-[#E2E8F0] rounded-xl bg-white text-sm text-[#1E293B] placeholder-slate-400 transition"
+                                    placeholder="Masukkan password" required>
+                                <button type="button" id="toggle-password" title="Tampilkan / sembunyikan password"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-[#94A3B8] mt-1.5">Guru &amp; Siswa: masukkan NIS/NIP pada kolom password sesuai akun.</p>
+                        </div>
+
+                        <button type="submit" id="login-btn"
+                            class="w-full bg-[#315A7D] hover:bg-[#274B69] text-white font-semibold py-3 px-4 rounded-xl transition duration-200 focus:outline-none focus:ring-2 focus:ring-[#94B3D0] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span id="btn-text">Masuk</span>
+                            <span id="btn-loading" class="hidden items-center justify-center gap-2">
+                                <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Memproses...
+                            </span>
                         </button>
+                    </form>
+
+                    <div class="mt-8 pt-6 border-t border-[#E2E8F0]">
+                        <p class="text-xs text-slate-500 text-center mb-3">Info Akun Demo</p>
+                        <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                            <div class="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-2">
+                                <p class="font-semibold text-slate-700">Admin</p>
+                                <p class="text-slate-500">Login via akun Supabase</p>
+                            </div>
+                            <div class="bg-[#EAF1F7] border border-[#D9E5F0] rounded-lg p-2">
+                                <p class="font-semibold text-navy-700">Guru &amp; Siswa</p>
+                                <p class="text-slate-500">Nama + NIS/NIP</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Submit Button -->
-                <button type="submit" id="login-btn"
-                    class="w-full bg-muhammadiyah-600 hover:bg-muhammadiyah-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-muhammadiyah-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span id="btn-text">Masuk</span>
-                    <span id="btn-loading" class="hidden">
-                        <svg class="animate-spin h-5 w-5 mx-auto" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </span>
-                </button>
-            </form>
+                <!-- =============================================================
+                 PROGRAM KEAHLIAN (informasi pendukung, prioritas ke-4)
+                 EDIT DI SINI: daftar kode mengikuti DATA MASTER aplikasi
+                 (lihat data/db.json & server/db.js -> jurusan: RPL, TKR,
+                 TSM, PBS, DPIB; masing-masing memiliki tingkat X, XI, XII).
+                 Keterangan satu baris pada tiap kartu adalah teks informasi
+                 umum (placeholder) yang boleh disesuaikan/dihapus tanpa
+                 mengubah logika aplikasi.
+                 ============================================================= -->
+            <section class="mupa-prog mt-7 sm:mt-8" aria-labelledby="mupa-prog-title">
+                <div class="flex items-center gap-3">
+                    <span class="mupa-prog__rule"></span>
+                    <h2 id="mupa-prog-title" class="mupa-prog__title">Program Keahlian</h2>
+                    <span class="mupa-prog__rule"></span>
+                </div>
 
-            <!-- Demo Accounts -->
-            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">Akun Demo</p>
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div class="bg-muhammadiyah-50 dark:bg-gray-700 rounded-lg p-2">
-                        <p class="font-semibold text-muhammadiyah-700 dark:text-muhammadiyah-300">Admin</p>
-                        <p class="text-gray-600 dark:text-gray-400">admin / admin123</p>
+                <div class="mupa-prog__grid mt-3.5">
+                    <div class="mupa-prog__item">
+                        <p class="mupa-prog__code">RPL</p>
+                        <p class="mupa-prog__desc">Pengembangan perangkat lunak, web, dan basis data.</p>
                     </div>
-                    <div class="bg-blue-50 dark:bg-gray-700 rounded-lg p-2">
-                        <p class="font-semibold text-blue-700 dark:text-blue-300">Guru</p>
-                        <p class="text-gray-600 dark:text-gray-400">budi / guru123</p>
+                    <div class="mupa-prog__item">
+                        <p class="mupa-prog__code">TKR</p>
+                        <p class="mupa-prog__desc">Pemeliharaan dan perbaikan kendaraan ringan.</p>
                     </div>
-                    <div class="bg-amber-50 dark:bg-gray-700 rounded-lg p-2">
-                        <p class="font-semibold text-amber-700 dark:text-amber-300">Siswa</p>
-                        <p class="text-gray-600 dark:text-gray-400">andi / siswa123</p>
+                    <div class="mupa-prog__item">
+                        <p class="mupa-prog__code">TSM</p>
+                        <p class="mupa-prog__desc">Perawatan dan perbaikan sepeda motor.</p>
+                    </div>
+                    <div class="mupa-prog__item">
+                        <p class="mupa-prog__code">PBS</p>
+                        <p class="mupa-prog__desc">Keterangan singkat program keahlian ini dapat disesuaikan.</p>
+                    </div>
+                    <div class="mupa-prog__item">
+                        <p class="mupa-prog__code">DPIB</p>
+                        <p class="mupa-prog__desc">Desain pemodelan dan informasi bangunan.</p>
                     </div>
                 </div>
-            </div>
+
+                <p class="mupa-prog__note">
+                    Kode program keahlian mengikuti data master aplikasi &middot; keterangan singkat dapat disesuaikan.
+                </p>
+            </section>
+
+            <!-- tagline singkat (visual, bukan klaim resmi sekolah) -->
+            <p class="mupa-quote">&ldquo;Belajar hari ini, berkarya untuk masa depan.&rdquo;</p>
+
+            <p class="text-center text-white/55 text-xs mt-6">&copy; 2026 SMKS Muhammadiyah Pakem. All rights reserved.</p>
         </div>
+    </main>
+    </div><!-- /.mupa-shell -->
 
-        <!-- Footer -->
-        <p class="text-center text-muhammadiyah-300 text-sm mt-8">
-            © 2024 SMKS Muhammadiyah Pakem. All rights reserved.
-        </p>
-    </div>
-
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/login-slideshow.js"></script>
+    <script src="js/sync-mapping.js"></script>
 
-    <!-- Firebase Database Layer (modular ESM via import maps) -->
-    <script type="importmap">
-    {
-      "imports": {
-        "firebase/app": "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-        "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-      }
-    }
+    <script>
+        document.documentElement.classList.remove('dark');
     </script>
-    <script type="module" src="/src/models/firebase-bootstrap.js"></script>
 </body>
 </html>

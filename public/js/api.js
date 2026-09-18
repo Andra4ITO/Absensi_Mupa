@@ -204,45 +204,57 @@ function getSocket() {
     return socket;
 }
 
-// ===== TOAST NOTIFICATION =====
+// ===== TOAST NOTIFICATION (satu implementasi untuk semua halaman) =====
+// Jenis: success | info | warning | error — TANPA warna hijau.
+// - aksen warna lembut + ikon, auto dismiss 4.5 detik, dapat ditutup manual
+// - aksesibel: role status/alert + aria-live, tombol tutup ber-aria-label
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
-    
-    const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-blue-500'
+
+    // Palet: biru/slate/amber/merah lembut (tidak ada hijau)
+    const variants = {
+        success: { wrap: 'border-blue-200',  bar: 'bg-blue-500',  icon: 'bg-blue-50 text-blue-600',   glyph: 'M5 13l4 4L19 7' },
+        info:    { wrap: 'border-slate-200', bar: 'bg-slate-400', icon: 'bg-slate-100 text-slate-600', glyph: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+        warning: { wrap: 'border-amber-200', bar: 'bg-amber-400', icon: 'bg-amber-50 text-amber-600', glyph: 'M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z' },
+        error:   { wrap: 'border-red-200',   bar: 'bg-red-500',   icon: 'bg-red-50 text-red-600',     glyph: 'M6 18L18 6M6 6l12 12' }
     };
-    
-    const icons = {
-        success: '✓',
-        error: '✕',
-        warning: '⚠',
-        info: 'ℹ'
-    };
-    
+    const v = variants[type] || variants.success;
+    const isAlert = (type === 'error' || type === 'warning');
+
     const toast = document.createElement('div');
-    toast.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-fade-in`;
-    toast.innerHTML = `
-        <span class="font-bold text-lg">${icons[type]}</span>
-        <span class="text-sm">${message}</span>
-        <button class="ml-4 text-white/80 hover:text-white" onclick="this.parentElement.remove()">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-        </button>
-    `;
-    
+    toast.className = 'relative overflow-hidden w-full max-w-[calc(100vw-2rem)] sm:max-w-sm bg-white border ' +
+        v.wrap + ' rounded-xl shadow-lg pl-4 pr-2 py-3 flex items-start gap-3 animate-fade-in';
+    toast.setAttribute('role', isAlert ? 'alert' : 'status');
+    toast.setAttribute('aria-live', isAlert ? 'assertive' : 'polite');
+    toast.innerHTML =
+        '<span class="absolute left-0 top-0 bottom-0 w-1 ' + v.bar + '" aria-hidden="true"></span>' +
+        '<span class="shrink-0 w-7 h-7 rounded-full ' + v.icon + ' flex items-center justify-center mt-0.5" aria-hidden="true">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="' + v.glyph + '"/></svg>' +
+        '</span>' +
+        '<p class="flex-1 text-sm text-slate-700 leading-snug break-words">' + message + '</p>' +
+        '<button type="button" class="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition" aria-label="Tutup notifikasi">' +
+            '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>' +
+        '</button>';
+
     container.appendChild(toast);
-    
-    // Auto remove setelah 4 detik
-    setTimeout(() => {
+
+    let removed = false;
+    let timer = null;
+    function dismiss() {
+        if (removed) return;
+        removed = true;
+        if (timer) clearTimeout(timer);
+        toast.style.transition = 'opacity 250ms ease, transform 250ms ease';
         toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.5s';
-        setTimeout(() => toast.remove(), 500);
-    }, 4000);
+        toast.style.transform = 'translateX(12px)';
+        setTimeout(function () { toast.remove(); }, 260);
+    }
+
+    const closeBtn = toast.querySelector('button');
+    if (closeBtn) closeBtn.addEventListener('click', dismiss);
+
+    timer = setTimeout(dismiss, 4500);
 }
 
 // ===== UTILITY FUNCTIONS =====
@@ -274,8 +286,8 @@ function formatWaktu(waktu) {
 function getStatusBadge(status) {
     // Badge untuk status sesi presensi
     const sesiBadges = {
-        'aktif': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        'ditutup': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+        'aktif': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+        'ditutup': 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-300',
         'expired': 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
     };
     const sesiMap = {
@@ -286,7 +298,7 @@ function getStatusBadge(status) {
     
     // Badge untuk status kehadiran siswa
     const kehadiranBadges = {
-        'Hadir': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        'Hadir': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
         'Izin': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
         'Sakit': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
         'Alpa': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
@@ -316,3 +328,4 @@ function logout() {
     API.clearToken();
     window.location.href = '/';
 }
+

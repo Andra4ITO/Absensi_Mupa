@@ -1,0 +1,350 @@
+/* =========================================================
+   HALAMAN LOGIN MUPA - LAYOUT SPLIT SCREEN
+   Desktop : KIRI  = slideshow foto sekolah (tinggi penuh, sticky)
+             KANAN = panel biru (logo -> judul -> card form login ->
+                     program keahlian -> tagline + dekorasi halus)
+   Mobile  : satu kolom (slideshow -> logo -> judul -> form -> jurusan)
+
+   Palet UI: Soft Navy / Slate / Blue-gray / White / Soft Gray
+   Tidak ada elemen UI berwarna hijau.
+
+   Aset yang dipakai (nama & ekstensi TIDAK diubah):
+     assets/school-1.jpeg   assets/school-2.jpeg
+     assets/school-3.jpeg   assets/logo-1.png
+   ========================================================= */
+
+html, body { min-height: 100%; }
+
+/* ---------- Kerangka: 1 kolom (mobile) -> 2 kolom (desktop) ---------- */
+.mupa-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);   /* mobile: satu kolom */
+    min-height: 100vh;
+    background-color: #EAF1F7;
+    overflow-x: clip;                        /* jaring aman: tidak ada scroll horizontal */
+}
+
+@media (min-width: 1024px) {
+    .mupa-shell {
+        /* kiri sekitar 46% / kanan sekitar 54% -> area form lebih lega */
+        grid-template-columns: minmax(0, 46fr) minmax(0, 54fr);
+        /* warna kolom kiri = fallback foto: bila panel kanan lebih tinggi dari
+           viewport, area di bawah foto (mis. saat screenshot 1 halaman penuh)
+           tetap navy dan menyatu, tidak tampak celah terang. */
+        background-color: #102438;
+    }
+}
+
+/* ---------- KIRI: panel foto sekolah (slider) ---------- */
+.mupa-banner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    height: 200px;                 /* mobile 180-240px */
+    background-color: #102438;     /* fallback sebelum foto selesai dimuat */
+}
+@media (min-width: 640px) { .mupa-banner { height: 240px; } }
+
+@media (min-width: 1024px) {
+    .mupa-banner {
+        height: 100vh;             /* desktop: memenuhi tinggi layar */
+        position: sticky;          /* foto tetap terlihat saat panel kanan di-scroll */
+        top: 0;
+        align-self: start;
+    }
+}
+
+/* ---------- Slide (crossfade) ---------- */
+.mupa-slide {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 800ms ease-in-out; /* durasi transisi fade = 800ms */
+    will-change: opacity;
+}
+.mupa-slide.is-active { opacity: 1; z-index: 3; }
+.mupa-slide.is-prev { opacity: 1; z-index: 2; } /* slide lama tetap tampil saat crossfade */
+
+.mupa-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* tidak gepeng, aspect ratio tetap */
+    object-position: center;
+    user-select: none;
+}
+
+/* object-position disesuaikan per foto & per breakpoint:
+   - mobile/tablet : frame lebar & pendek (mirip landscape foto asli)
+   - desktop       : frame tinggi (potongan vertikal) -> fokus bagian penting */
+.mupa-slide--1 img { object-position: center 42%; } /* gedung + papan nama sekolah */
+.mupa-slide--2 img { object-position: center 34%; } /* foto portrait: papan "Sugeng Rawuh" tetap terlihat */
+.mupa-slide--3 img { object-position: 22% 38%; }    /* gedung Kampus 2 + tulisan sekolah */
+
+@media (min-width: 1024px) {
+    .mupa-slide--1 img { object-position: 56% 46%; } /* papan nama & pintu masuk gedung */
+    .mupa-slide--2 img { object-position: center 33%; }
+    .mupa-slide--3 img { object-position: 32% 45%; }
+}
+
+/* Foto gagal dimuat -> slide disembunyikan (tanpa ikon broken image besar) */
+.mupa-slide.is-broken { display: none; }
+
+/* Semua foto gagal dimuat -> banner tetap navy rapi, halaman login tidak crash */
+.mupa-banner.is-empty {
+    background-image: linear-gradient(155deg, #274B69 0%, #172F4D 55%, #102438 100%);
+}
+
+/* ---------- Overlay sangat ringan: foto tetap terang, hanya untuk kontras indicator & tombol ---------- */
+.mupa-scrim {
+    z-index: 4;
+    background-image: linear-gradient(
+        to top,
+        rgba(16, 36, 56, 0.55) 0%,
+        rgba(16, 36, 56, 0.20) 38%,
+        rgba(16, 36, 56, 0.05) 70%,
+        rgba(16, 36, 56, 0) 100%
+    );
+}
+
+/* ---------- Indicator ---------- */
+.mupa-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: 0;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 1px 4px rgba(16, 36, 56, 0.45); /* tetap terlihat di foto terang */
+    cursor: pointer;
+    transition: width 300ms ease, background-color 300ms ease;
+}
+.mupa-dot[hidden] { display: none; } /* indicator foto yang gagal dimuat disembunyikan */
+.mupa-dot:hover { background-color: rgba(255, 255, 255, 0.8); }
+.mupa-dot.is-active { width: 24px; background-color: #FFFFFF; }
+
+/* ---------- Tombol navigasi sebelumnya / berikutnya ---------- */
+.mupa-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.40);
+    border-radius: 9999px;
+    background-color: rgba(16, 36, 56, 0.28); /* kontras di foto terang */
+    backdrop-filter: blur(2px);
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background-color 200ms ease, transform 200ms ease;
+}
+.mupa-nav:hover { background-color: rgba(16, 36, 56, 0.50); }
+.mupa-nav:active { transform: scale(0.94); }
+
+/* ---------- Logo sekolah (paling atas panel kanan) ---------- */
+.mupa-logo {
+    object-fit: contain; /* aspect ratio asli logo: tidak terpotong / gepeng */
+    user-select: none;
+}
+
+/* plate putih tipis di belakang logo: logo bernuansa gelap tetap terbaca di panel biru */
+.mupa-logo-plate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.97);
+    box-shadow:
+        0 16px 34px -16px rgba(9, 20, 34, 0.75),
+        0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+/* ---------- KANAN: panel biru ---------- */
+.mupa-panel {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    padding: 26px 18px 34px;
+    background-image: linear-gradient(135deg, #1E3A5F 0%, #315A7D 100%);
+}
+@media (min-width: 640px) { .mupa-panel { padding: 40px 28px 48px; } }
+@media (min-width: 1024px) { .mupa-panel { padding: 52px 44px 60px; } }
+
+.mupa-panel__inner {
+    position: relative;
+    z-index: 2;
+    align-self: flex-start;
+    width: 100%;
+    max-width: 420px;
+}
+
+/* ---------- Dekorasi halus (murni CSS: gradient blur + pola garis tipis) ---------- */
+.mupa-panel__deco {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image:
+        radial-gradient(520px 520px at 88% -10%, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0) 62%),
+        radial-gradient(420px 420px at -14% 32%, rgba(91, 127, 163, 0.35), rgba(91, 127, 163, 0) 66%),
+        radial-gradient(620px 380px at 50% 116%, rgba(16, 36, 56, 0.45), rgba(16, 36, 56, 0) 72%);
+}
+.mupa-panel__deco::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.05) 58%, transparent 88%);
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.05) 58%, transparent 88%);
+}
+.mupa-panel__deco::after {
+    content: "";
+    position: absolute;
+    right: -70px;
+    bottom: -70px;
+    width: 220px;
+    height: 220px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: inset 0 0 0 30px rgba(255, 255, 255, 0.03);
+}
+
+/* ---------- Card login (semi-putih agar tetap mudah dibaca di atas panel biru) ---------- */
+.mupa-card {
+    background-color: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 20px;
+    box-shadow:
+        0 26px 48px -26px rgba(9, 20, 34, 0.60),
+        0 2px 10px -6px rgba(9, 20, 34, 0.30);
+    padding: 20px;
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+@media (min-width: 640px) { .mupa-card { padding: 26px; border-radius: 22px; } }
+
+/* ---------- Program keahlian (kartu kecil, panel tetap tidak terlalu penuh) ---------- */
+.mupa-prog__rule {
+    flex: 1 1 0%;
+    height: 1px;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.32));
+}
+.mupa-prog__rule:last-child {
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0));
+}
+.mupa-prog__title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #DCE9F5;
+    white-space: nowrap;
+}
+.mupa-prog__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+.mupa-prog__item {
+    padding: 10px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.10);
+}
+/* jumlah kartu ganjil -> kartu terakhir melebar penuh agar grid tetap rapi */
+.mupa-prog__item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.mupa-prog__code {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #FFFFFF;
+}
+.mupa-prog__desc {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #C9DBEB;
+}
+.mupa-prog__note {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 10.5px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.52);
+}
+
+/* ---------- Tagline singkat ---------- */
+.mupa-quote {
+    margin-top: 20px;
+    padding: 10px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.07);
+    text-align: center;
+    font-size: 12.5px;
+    font-style: italic;
+    color: #D6E5F2;
+}
+
+/* ---------- Fokus keyboard ---------- */
+.mupa-dot:focus-visible,
+.mupa-nav:focus-visible {
+    outline: 2px solid #FFFFFF;
+    outline-offset: 2px;
+}
+
+/* ---------- Hormati preferensi pengguna ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .mupa-slide { transition: none; }
+}
+/* ---------- Overlay teks pada slideshow (panel kiri) ---------- */
+/* Chip navy semi-transparan: teks tetap terbaca di atas foto yang terang. */
+.mupa-caption {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(16, 36, 56, 0.42);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 24px -18px rgba(9, 20, 34, 0.9);
+    pointer-events: none; /* tidak menghalangi tombol navigasi / indicator */
+}
+.mupa-caption__school {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: #FFFFFF;
+}
+.mupa-caption__system {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: #D9E5F0;
+}
+@media (min-width: 640px) {
+    .mupa-caption { padding: 10px 14px; }
+    .mupa-caption__school { font-size: 13.5px; }
+    .mupa-caption__system { font-size: 11.5px; }
+}
+
+/* ---------- Subtitle panel kanan ---------- */
+.mupa-subtitle {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    color: #BFD3E4;
+}
+@media (min-width: 640px) { .mupa-subtitle { font-size: 13px; } }

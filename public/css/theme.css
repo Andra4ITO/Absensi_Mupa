@@ -1,0 +1,101 @@
+/* ============================================================
+   MUPA DESIGN SYSTEM - light / soft / elegant / professional
+   Tanpa warna hijau (navy / slate / blue / indigo saja)
+   ============================================================ */
+:root {
+  --mupa-bg: #F8FAFC;
+  --mupa-card: #FFFFFF;
+  --mupa-border: #E2E8F0;
+  --mupa-text: #1E293B;
+  --mupa-text-2: #64748B;
+  --mupa-muted: #94A3B8;
+  --mupa-primary: #315A7D;
+  --mupa-primary-hover: #274B69;
+  --mupa-sidebar: #1E3A5F;
+  --mupa-sidebar-dark: #172F4D;
+  --mupa-light: #EAF1F7;
+}
+
+/* ---- Card hover lift (micro-interaction) ---- */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px -12px rgba(23, 47, 77, 0.18);
+  border-color: #BFD3E4;
+}
+
+/* ---- Button press feedback ---- */
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* ---- Modal pop (fade + slight scale) ---- */
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-pop { animation: modalPop 0.2s ease-out; }
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.overlay-in { animation: overlayIn 0.18s ease-out; }
+
+/* ---- Toast slide-in ---- */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+#toast-container > div { animation: toastIn 0.2s ease-out; }
+
+/* ---- Skeleton loading ---- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #E2E8F0;
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* ---- Table row hover halus ---- */
+tbody tr { transition: background-color 0.15s ease; }
+
+/* ---- Progress bar (data asli) ---- */
+.bar-track {
+  background: #EAF1F7;
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+.bar-fill {
+  background: #315A7D;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* ---- Accessibility: focus keyboard jelas ---- */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #315A7D;
+  outline-offset: 2px;
+}
+
+/* ---- Hormati preferensi reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
