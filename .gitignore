@@ -1,3 +1,11 @@
+@"
 node_modules/
 .env
+.env.*
+!.env.example
 *.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+"@ | Out-File -Encoding utf8 .gitignore
