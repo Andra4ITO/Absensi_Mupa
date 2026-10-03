@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrasi LocalStorage &rarr; Firestore | Sistem Presensi Digital MUPA</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #0f172a; padding: 24px; }
+        .wrap { max-width: 980px; margin: 0 auto; }
+        h1 { font-size: 22px; margin-bottom: 4px; }
+        .sub { color: #64748b; font-size: 14px; margin-bottom: 16px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px; margin-bottom: 16px; }
+        .warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+        .ok { color: #15803d; font-weight: 600; }
+        .bad { color: #b91c1c; font-weight: 600; }
+        .warn-txt { font-size: 13px; line-height: 1.7; }
+        .warn-txt b { display: inline-block; min-width: 130px; }
+        .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        button { border: 0; border-radius: 8px; padding: 11px 20px; font-size: 14px; font-weight: 700; cursor: pointer; }
+        #btn-scan { background: #e2e8f0; color: #0f172a; }
+        #btn-scan:hover { background: #cbd5e1; }
+        #btn-migrate { background: #15803d; color: #fff; }
+        #btn-migrate:hover { background: #166534; }
+        button:disabled { opacity: .5; cursor: not-allowed; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+        th, td { border: 1px solid #e2e8f0; padding: 7px 9px; text-align: left; }
+        th { background: #f8fafc; }
+        #mig-scan { overflow-x: auto; }
+        #mig-log { background: #0f172a; color: #e2e8f0; border-radius: 8px; padding: 12px 14px;
+            font-family: Consolas, monospace; font-size: 12.5px; line-height: 1.7; height: 240px;
+            overflow-y: auto; white-space: pre-wrap; }
+        .log-error { color: #fca5a5; }
+        .log-warn { color: #fcd34d; }
+        .log-info { color: #a7f3d0; }
+        h2 { font-size: 15px; margin-bottom: 6px; }
+        .note { font-size: 12.5px; color: #64748b; line-height: 1.7; }
+        a { color: #2563eb; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>Migrasi LocalStorage &rarr; Firebase Firestore</h1>
+    <div class="sub">Sistem Presensi Digital MUPA &mdash; halaman manual, TERPISAH dari aplikasi (index / dashboard).</div>
+
+    <div class="card warn">
+        <div class="warn-txt">
+            <b>Cara kerja</b> Migrasi hanya berjalan jika Anda menekan tombol <b style="min-width:0">MIGRATE TO FIRESTORE</b> di halaman ini.
+            Tidak ada migrasi otomatis saat login, buka dashboard, refresh, atau startup.<br>
+            <b>localStorage</b> TIDAK pernah dihapus/diubah oleh halaman ini &mdash; tetap menjadi backup selamanya.<br>
+            <b>ID lama</b> dipertahankan sebagai Document ID (mis. <code>USR-001 &rarr; users/USR-001</code>). Aman dijalankan berulang
+            (dokumen identik dilewati &mdash; tanpa duplikasi).<br>
+            <b>Koneksi</b> memakai yang sudah ada: <code>window.FirebaseDB</code> + <code>window.FirestoreRepo</code>
+            (project <code>dataabsen-aa6db</code>) &mdash; tanpa inisialisasi baru, tanpa Firebase Auth, tanpa menyentuh Supabase,
+            tanpa <code>data/db.json</code>.<br>
+            <b>Field terlarang</b> (password, passwordHash, token, session, dsb.) tidak pernah dikirim ke Firestore.
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>1. Status koneksi</h2>
+        <div id="mig-status" class="ok">Memeriksa koneksi&hellip;</div>
+
+        <h2 style="margin-top:14px">2. Periksa data (READ-ONLY &mdash; tidak menulis apa pun)</h2>
+        <div class="btns">
+            <button id="btn-scan" type="button">PERIKSA DATA</button>
+            <button id="btn-migrate" type="button">MIGRATE TO FIRESTORE</button>
+        </div>
+        <div id="mig-scan"></div>
+
+        <h2 style="margin-top:14px">3. Hasil migrasi</h2>
+        <div id="mig-log" aria-live="polite"></div>
+    </div>
+
+    <div class="card">
+        <h2>Mapping (key localStorage &rarr; koleksi Firestore)</h2>
+        <table>
+            <thead><tr><th>Key localStorage</th><th>Koleksi / dokumen Firestore</th></tr></thead>
+            <tbody>
+                <tr><td>mupa_users</td><td>users</td></tr>
+                <tr><td>mupa_subjects</td><td>subjects</td></tr>
+                <tr><td>mupa_attendance_sessions</td><td>attendance_sessions</td></tr>
+                <tr><td>mupa_attendance_records</td><td>attendance_records</td></tr>
+                <tr><td>mupa_parking_tickets</td><td>parking_tickets</td></tr>
+                <tr><td>parking_absensi</td><td>parking_attendance</td></tr>
+                <tr><td>mupa_settings</td><td>settings/school</td></tr>
+                <tr><td>mupa_activity_log</td><td>activity_log</td></tr>
+            </tbody>
+        </table>
+        <p class="note" style="margin-top:8px">
+            Tidak dimigrasikan (sesuai aturan): <code>mupa_current_user</code>, <code>mupa_session_active</code>,
+            <code>token</code>, <code>access_token</code>, <code>refresh_token</code>, <code>password</code>,
+            <code>passwordHash</code>, <code>session</code>, <code>darkMode</code>, <code>theme</code>.
+        </p>
+    </div>
+
+    <p class="note">
+        Halaman ini satu-satunya tempat script <code>js/migrate-local-to-firestore.js</code> dimuat.
+        <a href="/">Kembali ke halaman utama</a>.
+    </p>
+</div>
+<!-- Urutan script IDENTIK dengan index.html (koneksi yang sudah ada; tanpa SDK baru). -->
+<script src="js/sync-mapping.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase.js"></script>
+<script src="js/firestore-repo.js"></script>
+<!-- Satu-satunya halaman yang memuat script migrasi ini: TIDAK otomatis, hanya tombol. -->
+<script src="js/migrate-local-to-firestore.js"></script>
+
+</body>
+</html>
